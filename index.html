@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOLAM FF — Admin Portal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root {
+    --bg:#0a0a0f; --bg2:#111118; --bg3:#1a1a24; --border:#2a2a3a;
+    --accent:#6c5ce7; --accent2:#a29bfe; --green:#00b894; --red:#d63031;
+    --yellow:#fdcb6e; --text:#e8e8f0; --text2:#888899; --text3:#555566;
+    --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;}
+  #sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+  .logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
+  .logo-title{font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--accent2);}
+  .logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
+  nav{flex:1;padding:12px 0;}
+  .nav-section{padding:10px 20px 4px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;border-left:3px solid transparent;}
+  .nav-item:hover{background:var(--bg3);color:var(--text);}
+  .nav-item.active{background:var(--bg3);color:var(--accent2);border-left-color:var(--accent);}
+  .nav-icon{font-size:15px;width:18px;text-align:center;}
+  .sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
+  .role-badge{display:inline-block;background:var(--accent);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-top:4px;}
+  .role-badge.reseller{background:var(--green);}
+  #main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+  #topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
+  .page-title{font-size:15px;font-weight:600;color:var(--text);}
+  .sync-btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--sans);transition:border-color 0.15s,color 0.15s;}
+  .sync-btn:hover{border-color:var(--accent);color:var(--accent2);}
+  #content{padding:24px;flex:1;}
+  .page{display:none;} .page.active{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+  .stat-label{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px;}
+  .stat-value{font-size:26px;font-weight:700;color:var(--text);font-family:var(--mono);}
+  .stat-card.green .stat-value{color:var(--green);}
+  .stat-card.purple .stat-value{color:var(--accent2);}
+  .stat-card.yellow .stat-value{color:var(--yellow);}
+  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+  .panel-title{font-size:13px;font-weight:600;}
+  .panel-body{padding:20px;}
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;}
+  td{padding:11px 14px;font-size:13px;border-bottom:1px solid #1c1c28;vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#13131e;}
+  .mono{font-family:var(--mono);font-size:11px;color:var(--text2);}
+  .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+  .badge-green{background:#00b89420;color:var(--green);}
+  .badge-red{background:#d6303120;color:var(--red);}
+  .badge-yellow{background:#fdcb6e20;color:var(--yellow);}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--sans);transition:opacity 0.15s,transform 0.1s;}
+  .btn:hover{opacity:0.85;} .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-green{background:var(--green);color:#fff;}
+  .btn-red{background:var(--red);color:#fff;}
+  .btn-ghost{background:var(--bg3);border:1px solid var(--border);color:var(--text2);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .search-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;transition:border-color 0.15s;}
+  .search-input:focus{border-color:var(--accent);}
+  .search-input::placeholder{color:var(--text3);}
+  .search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+  .form-grid{display:grid;gap:14px;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;}
+  .form-label{font-size:12px;font-weight:500;color:var(--text2);}
+  .form-input,.form-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;transition:border-color 0.15s;}
+  .form-input:focus,.form-select:focus{border-color:var(--accent);}
+  .form-input::placeholder{color:var(--text3);}
+  .validity-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:10px 0;}
+  .validity-card{background:var(--bg3);border:2px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:border-color 0.15s,background 0.15s;}
+  .validity-card:hover,.validity-card.selected{border-color:var(--accent);background:#6c5ce715;}
+  .validity-days{font-size:16px;font-weight:700;color:var(--text);}
+  .validity-label{font-size:10px;color:var(--text3);margin-top:2px;}
+  .validity-price{font-size:13px;font-weight:600;color:var(--accent2);margin-top:6px;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .modal-title{font-size:15px;font-weight:600;}
+  .modal-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;line-height:1;}
+  .modal-close:hover{color:var(--text);}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+  #toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 18px;font-size:13px;z-index:999;transform:translateY(80px);opacity:0;transition:transform 0.25s,opacity 0.25s;max-width:320px;}
+  #toast.show{transform:translateY(0);opacity:1;}
+  #toast.success{border-color:var(--green);color:var(--green);}
+  #toast.error{border-color:var(--red);color:var(--red);}
+  /* SETUP SCREEN */
+  #setup-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
+  .setup-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:36px;width:440px;max-width:95vw;}
+  .setup-logo{font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:4px;}
+  .setup-sub{font-size:12px;color:var(--text3);margin-bottom:24px;}
+  .setup-step{display:none;} .setup-step.active{display:block;}
+  .setup-btn{width:100%;margin-top:16px;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+  .setup-btn:hover{opacity:0.9;}
+  .info-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin:12px 0;font-size:12px;color:var(--text2);line-height:1.6;}
+  .info-box a{color:var(--accent2);}
+  .warning-box{background:#d6303115;border:1px solid var(--red);border-radius:8px;padding:12px;margin:12px 0;font-size:12px;color:#ff7675;}
+  /* LOGIN */
+  #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:998;}
+  .login-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:36px;width:380px;max-width:95vw;}
+  .login-logo{font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:4px;}
+  .login-sub{font-size:12px;color:var(--text3);margin-bottom:28px;}
+  .login-tabs{display:flex;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:20px;}
+  .login-tab{flex:1;text-align:center;padding:8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background 0.15s,color 0.15s;}
+  .login-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px #0005;}
+  .login-btn{width:100%;margin-top:16px;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);}
+  .balance-hero{background:linear-gradient(135deg,#6c5ce7 0%,#a29bfe 100%);border-radius:10px;padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+  .balance-amount{font-size:36px;font-weight:700;font-family:var(--mono);}
+  .empty{text-align:center;padding:40px 20px;color:var(--text3);}
+  .empty-icon{font-size:36px;margin-bottom:10px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SETUP SCREEN ═══ -->
+<div id="setup-screen">
+  <div class="setup-box">
+    <div class="setup-logo">ZOLAM FF</div>
+    <div class="setup-sub">First time setup — enter your credentials</div>
+
+    <!-- Step 1: GitHub Token -->
+    <div class="setup-step active" id="setup-step-1">
+      <div class="form-group">
+        <label class="form-label">GitHub Personal Access Token</label>
+        <input class="form-input" type="password" id="s-token" placeholder="ghp_xxxxxxxxxxxx">
+      </div>
+      <div class="info-box">
+        GitHub → Settings → Developer Settings → Personal Access Tokens → Generate new token (classic)<br>
+        Scope: <b>gist</b> only ✓
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">HWID Gist ID</label>
+        <input class="form-input" type="text" id="s-hwid-gist" placeholder="21688ac03cf928c865d103ee2d8c995b">
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label class="form-label">Reseller Gist ID</label>
+        <input class="form-input" type="text" id="s-res-gist" placeholder="230ba2cb1b7212bab459d20df7b67ac3">
+      </div>
+      <button class="setup-btn" onclick="setupStep1()">Next →</button>
+    </div>
+
+    <!-- Step 2: Admin Password -->
+    <div class="setup-step" id="setup-step-2">
+      <div class="form-group">
+        <label class="form-label">Set Admin Password</label>
+        <input class="form-input" type="password" id="s-pass" placeholder="Strong password">
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" type="password" id="s-pass2" placeholder="Repeat password">
+      </div>
+      <div class="warning-box">⚠️ এই password মনে রাখো — reset করতে localStorage clear করতে হবে</div>
+      <button class="setup-btn" onclick="setupStep2()">Complete Setup →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="login-screen" style="display:none;">
+  <div class="login-box">
+    <div class="login-logo">ZOLAM FF</div>
+    <div class="login-sub">Free Fire Controller — Admin Portal</div>
+    <div class="login-tabs">
+      <div class="login-tab active" onclick="setLoginTab('admin')">Admin</div>
+      <div class="login-tab" onclick="setLoginTab('reseller')">Reseller</div>
+    </div>
+    <div id="admin-fields">
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-pass" placeholder="Admin password">
+      </div>
+    </div>
+    <div id="reseller-fields" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Telegram ID</label>
+        <input class="form-input" type="text" id="login-tgid" placeholder="Your Telegram ID">
+      </div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div style="margin-top:14px;text-align:center;">
+      <span style="font-size:11px;color:var(--text3);cursor:pointer;" onclick="resetSetup()">Reset setup</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div id="sidebar">
+  <div class="logo">
+    <div class="logo-title">ZOLAM FF</div>
+    <div class="logo-sub">Controller Panel</div>
+  </div>
+  <nav id="nav-admin" style="display:none;">
+    <div class="nav-section">Admin</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⬡</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('users')"><span class="nav-icon">◈</span> Users</div>
+    <div class="nav-item" onclick="showPage('add-user')"><span class="nav-icon">＋</span> Add User</div>
+    <div class="nav-section">Resellers</div>
+    <div class="nav-item" onclick="showPage('resellers')"><span class="nav-icon">◉</span> Reseller List</div>
+    <div class="nav-item" onclick="showPage('add-reseller')"><span class="nav-icon">＋</span> Add Reseller</div>
+    <div class="nav-item" onclick="showPage('add-balance')"><span class="nav-icon">＄</span> Add Balance</div>
+  </nav>
+  <nav id="nav-reseller" style="display:none;">
+    <div class="nav-section">Reseller</div>
+    <div class="nav-item active" onclick="showPage('r-dashboard')"><span class="nav-icon">⬡</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('r-add-user')"><span class="nav-icon">＋</span> Add User</div>
+    <div class="nav-item" onclick="showPage('r-my-users')"><span class="nav-icon">◈</span> My Users</div>
+    <div class="nav-item" onclick="showPage('r-edit-user')"><span class="nav-icon">✎</span> Edit User</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="sb-name">—</div>
+    <div id="sb-badge" class="role-badge">Admin</div>
+    <div style="margin-top:8px;"><span style="cursor:pointer;color:var(--text3);font-size:12px;" onclick="logout()">Sign out</span></div>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div id="main">
+  <div id="topbar">
+    <div class="page-title" id="topbar-title">Dashboard</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="sync-btn" onclick="syncData()"><span id="sync-icon">↻</span> Sync</button>
+    </div>
+  </div>
+  <div id="content">
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-label">Active Users</div><div class="stat-value" id="stat-active">—</div></div>
+        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="stat-total">—</div></div>
+        <div class="stat-card yellow"><div class="stat-label">Expired</div><div class="stat-value" id="stat-expired">—</div></div>
+        <div class="stat-card purple"><div class="stat-label">Resellers</div><div class="stat-value" id="stat-resellers">—</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Recent Users</div><button class="btn btn-ghost btn-sm" onclick="showPage('users')">View All</button></div>
+        <div class="panel-body" id="recent-users-body"><div style="text-align:center;padding:30px;color:var(--text3);">Loading...</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">Resellers</div><button class="btn btn-ghost btn-sm" onclick="showPage('resellers')">View All</button></div>
+        <div class="panel-body" id="recent-resellers-body"><div style="text-align:center;padding:30px;color:var(--text3);">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="page-users">
+      <div class="search-bar">
+        <input class="search-input" id="user-search" placeholder="Search username or HWID..." oninput="renderUsers()">
+        <button class="btn btn-primary" onclick="showPage('add-user')">＋ Add User</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title" id="users-count">Users</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ADD USER -->
+    <div class="page" id="page-add-user">
+      <div class="panel" style="max-width:560px;">
+        <div class="panel-head"><div class="panel-title">Add New User</div></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">HWID (32 hex)</label><input class="form-input" id="au-hwid" placeholder="32 character hex HWID" maxlength="32"></div>
+            <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="au-username" placeholder="Player username"></div>
+            <div class="form-group"><label class="form-label">Validity</label>
+              <div class="validity-grid">
+                <div class="validity-card selected" onclick="selectValidity(this,1,2)"><div class="validity-days">1</div><div class="validity-label">Day</div><div class="validity-price">$2.00</div></div>
+                <div class="validity-card" onclick="selectValidity(this,3,4)"><div class="validity-days">3</div><div class="validity-label">Days</div><div class="validity-price">$4.00</div></div>
+                <div class="validity-card" onclick="selectValidity(this,7,8)"><div class="validity-days">7</div><div class="validity-label">Days</div><div class="validity-price">$8.00</div></div>
+                <div class="validity-card" onclick="selectValidity(this,15,10)"><div class="validity-days">15</div><div class="validity-label">Days</div><div class="validity-price">$10.00</div></div>
+                <div class="validity-card" onclick="selectValidity(this,30,15)"><div class="validity-days">30</div><div class="validity-label">Days</div><div class="validity-price">$15.00</div></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="adminAddUser()">Add User</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESELLERS -->
+    <div class="page" id="page-resellers">
+      <div class="search-bar">
+        <input class="search-input" id="reseller-search" placeholder="Search reseller..." oninput="renderResellers()">
+        <button class="btn btn-primary" onclick="showPage('add-reseller')">＋ Add Reseller</button>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title" id="resellers-count">Resellers</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Name</th><th>Telegram ID</th><th>Balance</th><th>Action</th></tr></thead>
+          <tbody id="resellers-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ADD RESELLER -->
+    <div class="page" id="page-add-reseller">
+      <div class="panel" style="max-width:480px;">
+        <div class="panel-head"><div class="panel-title">Add Reseller</div></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Telegram ID</label><input class="form-input" id="ar-id" placeholder="e.g. 8098128197" type="number"></div>
+            <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="ar-name" placeholder="Reseller name"></div>
+            <div class="form-group"><label class="form-label">Initial Balance ($)</label><input class="form-input" id="ar-balance" placeholder="e.g. 50.00" type="number" step="0.01"></div>
+            <button class="btn btn-green" style="width:100%;justify-content:center;padding:11px;" onclick="adminAddReseller()">Add Reseller</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD BALANCE -->
+    <div class="page" id="page-add-balance">
+      <div class="panel" style="max-width:480px;">
+        <div class="panel-head"><div class="panel-title">Add Balance</div></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Select Reseller</label>
+              <select class="form-select" id="ab-select"><option value="">— Select —</option></select>
+            </div>
+            <div id="ab-current" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;">
+              <div style="font-size:12px;color:var(--text3);">Current Balance</div>
+              <div id="ab-cur-val" style="font-size:20px;font-weight:700;color:var(--green);font-family:var(--mono);"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Amount ($)</label><input class="form-input" id="ab-amount" placeholder="e.g. 25.00" type="number" step="0.01"></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="adminAddBalance()">Add Balance</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESELLER DASHBOARD -->
+    <div class="page" id="page-r-dashboard">
+      <div class="balance-hero">
+        <div>
+          <div style="font-size:13px;opacity:0.8;margin-bottom:4px;" id="r-hero-name">—</div>
+          <div class="balance-amount" id="r-hero-bal">$0.00</div>
+          <div style="font-size:12px;opacity:0.7;margin-top:2px;">Available balance</div>
+        </div>
+        <div style="font-size:48px;opacity:0.4;">◈</div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card green"><div class="stat-label">Active Users</div><div class="stat-value" id="r-stat-active">—</div></div>
+        <div class="stat-card yellow"><div class="stat-label">Expired</div><div class="stat-value" id="r-stat-expired">—</div></div>
+        <div class="stat-card purple"><div class="stat-label">Total Added</div><div class="stat-value" id="r-stat-total">—</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">My Recent Users</div><button class="btn btn-ghost btn-sm" onclick="showPage('r-my-users')">View All</button></div>
+        <div class="panel-body" id="r-recent-body"><div style="text-align:center;padding:30px;color:var(--text3);">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- RESELLER ADD USER -->
+    <div class="page" id="page-r-add-user">
+      <div class="panel" style="max-width:560px;">
+        <div class="panel-head"><div class="panel-title">Add User</div></div>
+        <div class="panel-body">
+          <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:var(--text2);">Your Balance</span>
+            <span style="font-size:16px;font-weight:700;color:var(--green);font-family:var(--mono);" id="r-bal-display">$0.00</span>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">HWID</label><input class="form-input" id="rau-hwid" placeholder="32 hex HWID" maxlength="32"></div>
+            <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="rau-username" placeholder="Player username"></div>
+            <div class="form-group"><label class="form-label">Validity</label>
+              <div class="validity-grid">
+                <div class="validity-card selected" onclick="selectResellerValidity(this,1,2)"><div class="validity-days">1</div><div class="validity-label">Day</div><div class="validity-price">$2.00</div></div>
+                <div class="validity-card" onclick="selectResellerValidity(this,3,4)"><div class="validity-days">3</div><div class="validity-label">Days</div><div class="validity-price">$4.00</div></div>
+                <div class="validity-card" onclick="selectResellerValidity(this,7,8)"><div class="validity-days">7</div><div class="validity-label">Days</div><div class="validity-price">$8.00</div></div>
+                <div class="validity-card" onclick="selectResellerValidity(this,15,10)"><div class="validity-days">15</div><div class="validity-label">Days</div><div class="validity-price">$10.00</div></div>
+                <div class="validity-card" onclick="selectResellerValidity(this,30,15)"><div class="validity-days">30</div><div class="validity-label">Days</div><div class="validity-price">$15.00</div></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="resellerAddUser()">Add User — <span id="rau-cost">$2.00</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESELLER MY USERS -->
+    <div class="page" id="page-r-my-users">
+      <div class="search-bar">
+        <input class="search-input" id="r-user-search" placeholder="Search..." oninput="renderMyUsers()">
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title" id="r-users-count">My Users</div></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="r-users-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- RESELLER EDIT USER -->
+    <div class="page" id="page-r-edit-user">
+      <div class="panel" style="max-width:520px;">
+        <div class="panel-head"><div class="panel-title">Edit User</div></div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Search HWID or Username</label>
+              <div style="display:flex;gap:8px;"><input class="form-input" id="eu-search" placeholder="Search..."><button class="btn btn-ghost" onclick="searchForEdit()">Search</button></div>
+            </div>
+            <div id="eu-found" style="display:none;">
+              <div style="background:var(--bg3);border-radius:8px;padding:14px;margin-bottom:14px;"><div style="font-size:12px;color:var(--text3);margin-bottom:8px;">Found</div><div id="eu-found-info" style="font-size:13px;"></div></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">New Username</label><input class="form-input" id="eu-new-username" placeholder="Leave blank to keep"></div>
+                <div class="form-group"><label class="form-label">New HWID</label><input class="form-input" id="eu-new-hwid" placeholder="Leave blank to keep" maxlength="32"></div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-top:8px;" onclick="saveEdit()">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- REMOVE MODAL -->
+<div class="modal-overlay" id="modal-remove">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Remove User</div><button class="modal-close" onclick="closeModal('modal-remove')">×</button></div>
+    <div id="modal-remove-info" style="font-size:13px;color:var(--text2);margin-bottom:16px;"></div>
+    <div style="color:var(--red);font-size:13px;">This cannot be undone.</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-remove')">Cancel</button>
+      <button class="btn btn-red" onclick="confirmRemove()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- REMOVE RESELLER MODAL -->
+<div class="modal-overlay" id="modal-remove-reseller">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Remove Reseller</div><button class="modal-close" onclick="closeModal('modal-remove-reseller')">×</button></div>
+    <div id="modal-rr-info" style="font-size:13px;color:var(--text2);margin-bottom:16px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-remove-reseller')">Cancel</button>
+      <button class="btn btn-red" onclick="confirmRemoveReseller()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══ CONFIG (set via setup screen — stored in localStorage) ══
+let CFG = {};
+const PRICES = {1:2,3:4,7:8,15:10,30:15};
+
+// ══ STATE ══
+let currentRole=null,currentUser=null,allUsers=[],allResellers={};
+let selectedDays=1,rSelectedDays=1;
+let pendingRemoveHwid=null,pendingRemoveResellerId=null,editFoundEntry=null;
+let loginType='admin';
+
+// ══ SETUP ══
+function loadCFG(){
+  try{ CFG=JSON.parse(localStorage.getItem('zolam_cfg')||'{}'); }catch{ CFG={}; }
+}
+function saveCFG(){ localStorage.setItem('zolam_cfg',JSON.stringify(CFG)); }
+
+function setupStep1(){
+  const token=document.getElementById('s-token').value.trim();
+  const hg=document.getElementById('s-hwid-gist').value.trim();
+  const rg=document.getElementById('s-res-gist').value.trim();
+  if(!token||token.length<10){ toast('Enter GitHub token','error'); return; }
+  if(!hg||hg.length<10){ toast('Enter HWID Gist ID','error'); return; }
+  if(!rg||rg.length<10){ toast('Enter Reseller Gist ID','error'); return; }
+  CFG.token=token; CFG.hgist=hg; CFG.rgist=rg;
+  document.getElementById('setup-step-1').classList.remove('active');
+  document.getElementById('setup-step-2').classList.add('active');
+}
+
+function setupStep2(){
+  const p=document.getElementById('s-pass').value;
+  const p2=document.getElementById('s-pass2').value;
+  if(p.length<4){ toast('Password too short (min 4)','error'); return; }
+  if(p!==p2){ toast('Passwords do not match','error'); return; }
+  CFG.pass=btoa(p);
+  saveCFG();
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  toast('Setup complete! Login now.','success');
+}
+
+function resetSetup(){
+  if(confirm('Reset all settings? You will need to re-enter your token and password.')){
+    localStorage.removeItem('zolam_cfg');
+    location.reload();
+  }
+}
+
+// ══ LOGIN ══
+function setLoginTab(t){
+  loginType=t;
+  document.querySelectorAll('.login-tab').forEach(el=>el.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('admin-fields').style.display=t==='admin'?'':'none';
+  document.getElementById('reseller-fields').style.display=t==='reseller'?'':'none';
+}
+
+async function doLogin(){
+  if(loginType==='admin'){
+    const p=document.getElementById('login-pass').value;
+    if(btoa(p)!==CFG.pass){ toast('Wrong password','error'); return; }
+    currentRole='admin'; currentUser={name:'Admin',id:'owner'};
+    document.getElementById('sb-name').textContent='Admin';
+    document.getElementById('sb-badge').textContent='Admin';
+    document.getElementById('sb-badge').className='role-badge';
+    document.getElementById('nav-admin').style.display='';
+    document.getElementById('nav-reseller').style.display='none';
+    document.getElementById('login-screen').style.display='none';
+    await loadData(); showPage('dashboard');
+  } else {
+    const tid=document.getElementById('login-tgid').value.trim();
+    if(!tid){ toast('Enter Telegram ID','error'); return; }
+    toast('Checking...','');
+    await loadData();
+    if(allResellers[tid]){
+      currentRole='reseller';
+      currentUser={id:tid,name:allResellers[tid].name,balance:allResellers[tid].balance};
+      document.getElementById('sb-name').textContent=currentUser.name;
+      document.getElementById('sb-badge').textContent='Reseller';
+      document.getElementById('sb-badge').className='role-badge reseller';
+      document.getElementById('nav-admin').style.display='none';
+      document.getElementById('nav-reseller').style.display='';
+      document.getElementById('login-screen').style.display='none';
+      showPage('r-dashboard');
+    } else { toast('Not found. Contact admin.','error'); }
+  }
+}
+
+function logout(){
+  currentRole=null; currentUser=null; allUsers=[]; allResellers={};
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('nav-admin').style.display='none';
+  document.getElementById('nav-reseller').style.display='none';
+}
+
+// ══ DATA ══
+function hwidUrl(){ return `https://gist.githubusercontent.com/toriqulrx-ux/${CFG.hgist}/raw/device.txt?t=${Date.now()}`; }
+function resUrl(){ return `https://gist.githubusercontent.com/toriqulrx-ux/${CFG.rgist}/raw/Reseller%20data.txt?t=${Date.now()}`; }
+
+async function loadData(){
+  await Promise.all([loadUsers(),loadResellers()]);
+}
+async function loadUsers(){
+  try{
+    const r=await fetch(hwidUrl());
+    const t=await r.text();
+    allUsers=t.trim().split('\n').filter(l=>l&&l.split('=').length>=3).map(l=>{
+      const p=l.split('='); return{username:p[0],hwid:p[1],expire:p[2]};
+    });
+  }catch{ allUsers=[]; }
+}
+async function loadResellers(){
+  try{
+    const r=await fetch(resUrl());
+    const t=await r.text();
+    allResellers={};
+    t.trim().split('\n').forEach(l=>{
+      if(!l) return;
+      const p=l.split('=');
+      if(p[0]==='RESELLER'&&p.length>=4) allResellers[p[1]]={name:p[2],balance:parseFloat(p[3])||0};
+    });
+  }catch{ allResellers={}; }
+}
+async function gistUpdate(gistId,filename,content){
+  const r=await fetch(`https://api.github.com/gists/${gistId}`,{
+    method:'PATCH',
+    headers:{'Authorization':'token '+CFG.token,'Content-Type':'application/json'},
+    body:JSON.stringify({files:{[filename]:{content}}})
+  });
+  if(!r.ok) throw new Error('Failed');
+}
+function saveUsers(){ return gistUpdate(CFG.hgist,'device.txt',allUsers.map(u=>`${u.username}=${u.hwid}=${u.expire}`).join('\n')); }
+function saveResellers(){ return gistUpdate(CFG.rgist,'Reseller data.txt',Object.entries(allResellers).map(([uid,d])=>`RESELLER=${uid}=${d.name}=${d.balance.toFixed(2)}`).join('\n')); }
+
+async function syncData(){
+  const ic=document.getElementById('sync-icon');
+  ic.style.animation='spin 1s linear infinite';
+  await loadData(); renderAll();
+  ic.style.animation='';
+  toast('Synced!','success');
+}
+
+// ══ HELPERS ══
+function isExpired(d){ try{ const[dd,mm,yy]=d.split('/').map(Number); return new Date(yy,mm-1,dd)<new Date(); }catch{ return false; } }
+function isValidHwid(h){ return h.length===32&&/^[0-9a-fA-F]{32}$/.test(h); }
+function addDays(days){ const d=new Date(); d.setDate(d.getDate()+days); return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+function statusBadge(e){ return isExpired(e)?'<span class="badge badge-red">Expired</span>':'<span class="badge badge-green">Active</span>'; }
+
+// ══ RENDER ══
+function renderAll(){
+  if(currentRole==='admin'){ renderDashboard(); renderUsers(); renderResellers(); populateResellerSelect(); }
+  else if(currentRole==='reseller'){ renderResellerDashboard(); renderMyUsers(); updateResellerBalance(); }
+}
+function renderDashboard(){
+  document.getElementById('stat-active').textContent=allUsers.filter(u=>!isExpired(u.expire)).length;
+  document.getElementById('stat-total').textContent=allUsers.length;
+  document.getElementById('stat-expired').textContent=allUsers.filter(u=>isExpired(u.expire)).length;
+  document.getElementById('stat-resellers').textContent=Object.keys(allResellers).length;
+  const recent=[...allUsers].slice(-5).reverse();
+  document.getElementById('recent-users-body').innerHTML=!recent.length?'<div class="empty"><div class="empty-icon">◈</div>No users</div>':`<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${recent.map(u=>`<tr><td>${u.username}</td><td class="mono">${u.hwid.substring(0,8)}…</td><td>${u.expire}</td><td>${statusBadge(u.expire)}</td></tr>`).join('')}</tbody></table></div>`;
+  const rs=Object.entries(allResellers);
+  document.getElementById('recent-resellers-body').innerHTML=!rs.length?'<div class="empty"><div class="empty-icon">◉</div>No resellers</div>':`<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>ID</th><th>Balance</th></tr></thead><tbody>${rs.map(([uid,d])=>`<tr><td>${d.name}</td><td class="mono">${uid}</td><td style="color:var(--green);font-family:var(--mono);">$${d.balance.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderUsers(){
+  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
+  const f=allUsers.filter(u=>u.username.toLowerCase().includes(q)||u.hwid.toLowerCase().includes(q));
+  document.getElementById('users-count').textContent=`Users (${f.length})`;
+  document.getElementById('users-tbody').innerHTML=!f.length?`<tr><td colspan="6"><div class="empty"><div class="empty-icon">◈</div>No users</div></td></tr>`:f.map((u,i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${u.username}</b></td><td class="mono">${u.hwid.substring(0,12)}…</td><td>${u.expire}</td><td>${statusBadge(u.expire)}</td><td><button class="btn btn-red btn-sm" onclick="openRemoveModal('${u.hwid}','${u.username}')">Remove</button></td></tr>`).join('');
+}
+function renderResellers(){
+  const q=(document.getElementById('reseller-search')||{value:''}).value.toLowerCase();
+  const e=Object.entries(allResellers).filter(([uid,d])=>d.name.toLowerCase().includes(q)||uid.includes(q));
+  document.getElementById('resellers-count').textContent=`Resellers (${e.length})`;
+  document.getElementById('resellers-tbody').innerHTML=!e.length?`<tr><td colspan="5"><div class="empty">No resellers</div></td></tr>`:e.map(([uid,d],i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${d.name}</b></td><td class="mono">${uid}</td><td style="color:var(--green);font-family:var(--mono);font-weight:600;">$${d.balance.toFixed(2)}</td><td style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="quickAddBal('${uid}')">+Bal</button><button class="btn btn-red btn-sm" onclick="openRemoveResellerModal('${uid}','${d.name}')">Remove</button></td></tr>`).join('');
+}
+function populateResellerSelect(){
+  const sel=document.getElementById('ab-select');
+  sel.innerHTML='<option value="">— Select —</option>'+Object.entries(allResellers).map(([uid,d])=>`<option value="${uid}">${d.name} (${uid})</option>`).join('');
+  sel.onchange=function(){ const uid=this.value; const info=document.getElementById('ab-current'); if(uid&&allResellers[uid]){ info.style.display='block'; document.getElementById('ab-cur-val').textContent='$'+allResellers[uid].balance.toFixed(2); }else{ info.style.display='none'; } };
+}
+function selectValidity(el,days){ document.querySelectorAll('#page-add-user .validity-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); selectedDays=days; }
+function selectResellerValidity(el,days,price){ document.querySelectorAll('#page-r-add-user .validity-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); rSelectedDays=days; document.getElementById('rau-cost').textContent='$'+price.toFixed(2); }
+function quickAddBal(uid){ showPage('add-balance'); setTimeout(()=>{ const s=document.getElementById('ab-select'); s.value=uid; s.dispatchEvent(new Event('change')); },100); }
+
+// ══ ADMIN ACTIONS ══
+async function adminAddUser(){
+  const hwid=document.getElementById('au-hwid').value.trim();
+  const username=document.getElementById('au-username').value.trim();
+  if(!isValidHwid(hwid)){ toast('Invalid HWID','error'); return; }
+  if(!username){ toast('Enter username','error'); return; }
+  const expire=addDays(selectedDays);
+  const idx=allUsers.findIndex(u=>u.hwid===hwid);
+  if(idx>=0) allUsers[idx]={username,hwid,expire}; else allUsers.push({username,hwid,expire});
+  try{ await saveUsers(); toast(`"${username}" added — expires ${expire}`,'success'); document.getElementById('au-hwid').value=''; document.getElementById('au-username').value=''; renderAll(); }
+  catch{ toast('Save failed','error'); }
+}
+async function adminAddReseller(){
+  const id=document.getElementById('ar-id').value.trim();
+  const name=document.getElementById('ar-name').value.trim();
+  const bal=parseFloat(document.getElementById('ar-balance').value)||0;
+  if(!id||!id.match(/^\d+$/)){ toast('Valid Telegram ID required','error'); return; }
+  if(!name){ toast('Enter name','error'); return; }
+  if(allResellers[id]){ toast('Already a reseller','error'); return; }
+  allResellers[id]={name,balance:bal};
+  try{ await saveResellers(); toast(`"${name}" added`,'success'); document.getElementById('ar-id').value=''; document.getElementById('ar-name').value=''; document.getElementById('ar-balance').value=''; renderAll(); populateResellerSelect(); }
+  catch{ toast('Save failed','error'); }
+}
+async function adminAddBalance(){
+  const uid=document.getElementById('ab-select').value;
+  const amount=parseFloat(document.getElementById('ab-amount').value)||0;
+  if(!uid){ toast('Select reseller','error'); return; }
+  if(amount<=0){ toast('Enter valid amount','error'); return; }
+  const old=allResellers[uid].balance;
+  allResellers[uid].balance=Math.round((old+amount)*100)/100;
+  try{ await saveResellers(); toast(`Balance: $${old.toFixed(2)} → $${allResellers[uid].balance.toFixed(2)}`,'success'); document.getElementById('ab-amount').value=''; document.getElementById('ab-select').dispatchEvent(new Event('change')); renderAll(); }
+  catch{ toast('Save failed','error'); }
+}
+
+// ══ REMOVE ══
+function openRemoveModal(hwid,username){ pendingRemoveHwid=hwid; document.getElementById('modal-remove-info').innerHTML=`<b>${username}</b><br><span class="mono">${hwid}</span>`; document.getElementById('modal-remove').classList.add('open'); }
+async function confirmRemove(){ if(!pendingRemoveHwid) return; allUsers=allUsers.filter(u=>u.hwid!==pendingRemoveHwid); try{ await saveUsers(); toast('Removed','success'); closeModal('modal-remove'); renderAll(); }catch{ toast('Failed','error'); } pendingRemoveHwid=null; }
+function openRemoveResellerModal(uid,name){ pendingRemoveResellerId=uid; document.getElementById('modal-rr-info').innerHTML=`<b>${name}</b> (${uid})`; document.getElementById('modal-remove-reseller').classList.add('open'); }
+async function confirmRemoveReseller(){ if(!pendingRemoveResellerId) return; delete allResellers[pendingRemoveResellerId]; try{ await saveResellers(); toast('Removed','success'); closeModal('modal-remove-reseller'); renderAll(); populateResellerSelect(); }catch{ toast('Failed','error'); } pendingRemoveResellerId=null; }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ══ RESELLER ══
+function updateResellerBalance(){ if(!currentUser) return; const bal=allResellers[currentUser.id]?.balance??currentUser.balance; document.getElementById('r-hero-name').textContent=currentUser.name; document.getElementById('r-hero-bal').textContent='$'+bal.toFixed(2); document.getElementById('r-bal-display').textContent='$'+bal.toFixed(2); }
+function renderResellerDashboard(){ updateResellerBalance(); const my=allUsers.filter(u=>u.username.startsWith(currentUser.name+'_')); document.getElementById('r-stat-active').textContent=my.filter(u=>!isExpired(u.expire)).length; document.getElementById('r-stat-expired').textContent=my.filter(u=>isExpired(u.expire)).length; document.getElementById('r-stat-total').textContent=my.length; const rec=[...my].slice(-5).reverse(); document.getElementById('r-recent-body').innerHTML=!rec.length?'<div class="empty"><div class="empty-icon">◈</div>No users yet</div>':`<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${rec.map(u=>`<tr><td>${u.username}</td><td class="mono">${u.hwid.substring(0,8)}…</td><td>${u.expire}</td><td>${statusBadge(u.expire)}</td></tr>`).join('')}</tbody></table></div>`; }
+async function resellerAddUser(){ const hwid=document.getElementById('rau-hwid').value.trim(); const username=document.getElementById('rau-username').value.trim(); if(!isValidHwid(hwid)){ toast('Invalid HWID','error'); return; } if(!username){ toast('Enter username','error'); return; } const price=PRICES[rSelectedDays]; const bal=allResellers[currentUser.id]?.balance??0; if(bal<price){ toast(`Need $${price}, have $${bal.toFixed(2)}`,'error'); return; } const expire=addDays(rSelectedDays); const fullName=currentUser.name+'_'+username; allResellers[currentUser.id].balance=Math.round((bal-price)*100)/100; const idx=allUsers.findIndex(u=>u.hwid===hwid); if(idx>=0) allUsers[idx]={username:fullName,hwid,expire}; else allUsers.push({username:fullName,hwid,expire}); try{ await Promise.all([saveUsers(),saveResellers()]); toast(`"${username}" added`,'success'); document.getElementById('rau-hwid').value=''; document.getElementById('rau-username').value=''; currentUser.balance=allResellers[currentUser.id].balance; renderAll(); }catch{ toast('Save failed','error'); } }
+function renderMyUsers(){ const q=(document.getElementById('r-user-search')||{value:''}).value.toLowerCase(); const my=allUsers.filter(u=>u.username.startsWith(currentUser.name+'_')); const f=my.filter(u=>u.username.toLowerCase().includes(q)||u.hwid.toLowerCase().includes(q)); document.getElementById('r-users-count').textContent=`My Users (${f.length})`; document.getElementById('r-users-tbody').innerHTML=!f.length?`<tr><td colspan="6"><div class="empty">No users</div></td></tr>`:f.map((u,i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${u.username}</b></td><td class="mono">${u.hwid.substring(0,12)}…</td><td>${u.expire}</td><td>${statusBadge(u.expire)}</td><td><button class="btn btn-red btn-sm" onclick="openRemoveModal('${u.hwid}','${u.username}')">Remove</button></td></tr>`).join(''); }
+function searchForEdit(){ const q=document.getElementById('eu-search').value.trim().toLowerCase(); editFoundEntry=null; let found=null; for(const u of allUsers){ if(u.hwid.toLowerCase()===q||u.username.toLowerCase()===q||u.username.split('_').pop().toLowerCase()===q){ found=u; break; } } if(!found){ toast('Not found','error'); document.getElementById('eu-found').style.display='none'; return; } editFoundEntry=found; document.getElementById('eu-found').style.display='block'; document.getElementById('eu-found-info').innerHTML=`<b>Username:</b> ${found.username}<br><b>HWID:</b> <span class="mono">${found.hwid}</span><br><b>Expires:</b> ${found.expire}`; }
+async function saveEdit(){ if(!editFoundEntry) return; const newU=document.getElementById('eu-new-username').value.trim(); const newH=document.getElementById('eu-new-hwid').value.trim(); if(newH&&!isValidHwid(newH)){ toast('Invalid HWID','error'); return; } const idx=allUsers.findIndex(u=>u.hwid===editFoundEntry.hwid); if(idx<0){ toast('Not found','error'); return; } if(newU) allUsers[idx].username=newU; if(newH) allUsers[idx].hwid=newH; try{ await saveUsers(); toast('Updated','success'); document.getElementById('eu-found').style.display='none'; document.getElementById('eu-search').value=''; renderAll(); }catch{ toast('Failed','error'); } }
+
+// ══ NAV ══
+const PAGE_TITLES={'dashboard':'Dashboard','users':'Users','add-user':'Add User','resellers':'Resellers','add-reseller':'Add Reseller','add-balance':'Add Balance','r-dashboard':'Dashboard','r-add-user':'Add User','r-my-users':'My Users','r-edit-user':'Edit User'};
+function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); const pg=document.getElementById('page-'+id); if(pg) pg.classList.add('active'); document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active'); }); document.getElementById('topbar-title').textContent=PAGE_TITLES[id]||id; if(id==='add-balance') populateResellerSelect(); if(id==='r-dashboard') renderResellerDashboard(); if(id==='r-my-users') renderMyUsers(); if(id==='r-add-user') updateResellerBalance(); }
+
+// ══ TOAST ══
+let toastTimer;
+function toast(msg,type=''){ const el=document.getElementById('toast'); el.textContent=msg; el.className='show '+(type||''); clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ el.className=''; },3000); }
+
+// ══ INIT ══
+loadCFG();
+if(!CFG.token||!CFG.pass){
+  document.getElementById('setup-screen').style.display='flex';
+  document.getElementById('login-screen').style.display='none';
+} else {
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('login-screen').style.display==='flex') doLogin(); });
+</script>
+</body>
+</html>
