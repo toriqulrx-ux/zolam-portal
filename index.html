@@ -198,7 +198,8 @@ strong { font-weight: 700; }
 .remember-chk:focus-visible + .remember-box { box-shadow: 0 0 0 4px var(--accent-ring); }
 .remember-label { color: var(--text2); font-size: 13px; }
 
-.att-bar { height: 3px; background: var(--surface3); border-radius: 3px; margin-bottom: 14px; overflow: hidden; display: none; }
+.att-bar { height: 3px; background: var(--surface3); border-radius: 3px; margin-bottom: 14px; overflow: hidden; opacity: 0; transition: opacity .3s; }
+.att-bar.show { opacity: 1; }
 .att-fill { height: 100%; background: var(--red); border-radius: 3px; transition: width .4s var(--ease); }
 #login-err { font-size: 13px; color: var(--red); margin-top: 14px; min-height: 20px; text-align: center; }
 #login-err.info { color: var(--text2); }
@@ -207,7 +208,7 @@ strong { font-weight: 700; }
 .btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   height: 40px; padding: 0 16px; border-radius: var(--r);
-  font-size: 13.5px; font-weight: 700; white-space: nowrap; user-select: none;
+  font-size: 13.5px; font-weight: 700; white-space: nowrap; user-select: none; overflow: hidden;
   transition: transform .2s var(--ease), background .2s, border-color .2s, box-shadow .25s, color .2s, opacity .2s;
 }
 .btn:active:not(:disabled) { transform: scale(.97); }
@@ -221,7 +222,7 @@ strong { font-weight: 700; }
 .btn-danger-solid { background: #e11d48; color: #fff; box-shadow: 0 6px 18px rgba(225,29,72,.3); }
 .btn-sm { height: 32px; padding: 0 12px; font-size: 12.5px; border-radius: 9px; gap: 6px; }
 .btn-block { width: 100%; height: 46px; }
-.btn .spin-ic { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: spin .7s linear infinite; }
+.btn .spin-ic { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid currentColor; border-top-color: transparent; opacity: .9; animation: spin .7s linear infinite; }
 .btn.loading .spin-ic { display: inline-block; }
 .btn.loading .btn-label { opacity: .85; }
 @media (hover:hover) {
@@ -231,6 +232,42 @@ strong { font-weight: 700; }
   .btn-danger:hover { background: rgba(251,113,133,.2); }
   .btn-danger-solid:hover { background: #f43f5e; }
 }
+
+
+/* ── button states: loading / done / error / ripple ── */
+.btn.loading { pointer-events: none; cursor: progress; }
+.btn.loading::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.24) 50%, transparent 70%);
+  transform: translateX(-100%); animation: btnSweep 1.2s ease-in-out infinite;
+}
+.btn.loading .btn-label { animation: labelPulse 1.4s ease-in-out infinite; }
+.btn.done, .btn.done:hover { pointer-events: none; color: #04261a; background: linear-gradient(180deg, #4ade9f 0%, #22c58b 100%); border-color: transparent; box-shadow: 0 8px 22px rgba(52,211,153,.35); }
+.btn.done .i { stroke-width: 3; stroke-dasharray: 26; stroke-dashoffset: 26; animation: drawCheck .5s var(--ease-out) .05s forwards; }
+.btn.shake { animation: shake .45s var(--ease); }
+.btn .btn-label, .btn .i { transition: opacity .2s; }
+.ripple { position: absolute; border-radius: 50%; pointer-events: none; background: rgba(255,255,255,.32); transform: scale(0); animation: ripple .65s var(--ease-out) forwards; }
+.busy { pointer-events: none; }
+.busy .field, .busy .val-grid, .busy .info-box, .busy .form-row { opacity: .55; transition: opacity .3s; }
+.busy .modal-foot .btn-ghost { opacity: .45; }
+@keyframes btnSweep { to { transform: translateX(100%); } }
+@keyframes labelPulse { 50% { opacity: .65; } }
+@keyframes drawCheck { to { stroke-dashoffset: 0; } }
+@keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+@keyframes ripple { to { transform: scale(1); opacity: 0; } }
+
+
+/* ── global progress bar (shows on every server request) ── */
+#progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; pointer-events: none; opacity: 0; transition: opacity .3s; }
+#progress.on { opacity: 1; }
+#progress i { display: block; height: 100%; width: 0; border-radius: 0 3px 3px 0; background: linear-gradient(90deg, #7c3aed, #a78bfa, #c4b5fd); box-shadow: 0 0 12px rgba(167,139,250,.8); transition: width .45s var(--ease); }
+/* ── content refreshing state ── */
+.panel, .stat-card { transition: opacity .3s, border-color .3s, transform .35s var(--ease); }
+#content.loading-data .panel { opacity: .6; }
+#content.loading-data .stat-val, #content.loading-data .bal-hero-amount { animation: labelPulse 1s ease-in-out infinite; }
+#content.loading-data tbody tr { animation: labelPulse 1.1s ease-in-out infinite; }
+.hw.copied { display: inline-flex; align-items: center; gap: 5px; color: var(--green); background: var(--green-lo); }
+.login-card.busy .login-tabs, .login-card.busy .remember-row { opacity: .55; transition: opacity .3s; }
 
 /* ═══════════ SIDEBAR ═══════════ */
 #sidebar {
@@ -633,6 +670,8 @@ th.th-act { text-align: right; }
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
     <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
   </defs>
 </svg>
@@ -677,12 +716,13 @@ th.th-act { text-align: right; }
       </div>
 
       <div class="field">
-        <label for="login-id">Telegram ID</label>
-        <input class="inp" type="number" inputmode="numeric" id="login-id" placeholder="e.g. 8179239922" autocomplete="username">
+        <label for="login-id">User ID</label>
+        <div class="inp-wrap"><svg class="i"><use href="#i-user"/></svg><input class="inp" type="number" inputmode="numeric" id="login-id" placeholder="Enter your user ID" autocomplete="username"></div>
       </div>
       <div class="field">
         <label for="login-pw">Password</label>
-        <div class="pw-wrap">
+        <div class="pw-wrap inp-wrap">
+          <svg class="i"><use href="#i-lock"/></svg>
           <input class="inp" type="password" id="login-pw" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
           <button type="button" class="pw-eye" onclick="togglePw('login-pw',this)" tabindex="-1" aria-label="Show password">
             <svg class="i i-on"><use href="#i-eye"/></svg><svg class="i i-off"><use href="#i-eye-off"/></svg>
@@ -827,7 +867,7 @@ th.th-act { text-align: right; }
                 <button type="button" class="val-card" onclick="selVal(this,30)"><div class="val-days">30</div><div class="val-label">Days</div><div class="val-price">$15</div></button>
               </div>
             </div>
-            <button class="btn btn-primary btn-block" onclick="addUser()">Add user</button>
+            <button class="btn btn-primary btn-block" onclick="addUser(this)">Add user</button>
           </div>
         </div>
       </div>
@@ -843,7 +883,7 @@ th.th-act { text-align: right; }
         <div class="panel-head"><div class="panel-title">Resellers <span class="count" id="r-cnt">0</span></div></div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>#</th><th>Name</th><th>Telegram ID</th><th>Balance</th><th class="th-act">Actions</th></tr></thead>
+            <thead><tr><th>#</th><th>Name</th><th>User ID</th><th>Balance</th><th class="th-act">Actions</th></tr></thead>
             <tbody id="r-tbody"></tbody>
           </table>
         </div>
@@ -856,7 +896,7 @@ th.th-act { text-align: right; }
         <div class="panel-head"><div class="panel-title">Add reseller</div></div>
         <div class="panel-body">
           <div class="form-grid">
-            <div class="field"><label for="ar-id">Telegram ID</label><input class="inp" id="ar-id" placeholder="e.g. 8098128197" type="number" inputmode="numeric"></div>
+            <div class="field"><label for="ar-id">User ID</label><input class="inp" id="ar-id" placeholder="Reseller’s user ID" type="number" inputmode="numeric"></div>
             <div class="field"><label for="ar-name">Name</label><input class="inp" id="ar-name" placeholder="Reseller name" autocomplete="off"></div>
             <div class="field"><label for="ar-bal">Initial balance ($)</label><input class="inp" id="ar-bal" placeholder="e.g. 50" type="number" inputmode="decimal" step="0.01"></div>
             <div class="field">
@@ -866,7 +906,7 @@ th.th-act { text-align: right; }
                 <button type="button" class="pw-eye" onclick="togglePw('ar-pw',this)" tabindex="-1" aria-label="Show password"><svg class="i i-on"><use href="#i-eye"/></svg><svg class="i i-off"><use href="#i-eye-off"/></svg></button>
               </div>
             </div>
-            <button class="btn btn-primary btn-block" onclick="addReseller()">Create reseller</button>
+            <button class="btn btn-primary btn-block" onclick="addReseller(this)">Create reseller</button>
           </div>
         </div>
       </div>
@@ -884,7 +924,7 @@ th.th-act { text-align: right; }
             </div>
             <div id="ab-info" style="display:none;margin-bottom:16px" class="info-box info-row"><span>Current balance</span><strong id="ab-cur" class="bal-num"></strong></div>
             <div class="field"><label for="ab-amt">Amount ($)</label><input class="inp" id="ab-amt" placeholder="e.g. 25" type="number" inputmode="decimal" step="0.01"></div>
-            <button class="btn btn-primary btn-block" onclick="addBalance()">Add balance</button>
+            <button class="btn btn-primary btn-block" onclick="addBalance(this)">Add balance</button>
           </div>
         </div>
       </div>
@@ -937,7 +977,7 @@ th.th-act { text-align: right; }
                 <button type="button" class="val-card" onclick="selRVal(this,30,15)"><div class="val-days">30</div><div class="val-label">Days</div><div class="val-price">$15</div></button>
               </div>
             </div>
-            <button class="btn btn-primary btn-block" onclick="rAddUser()">Add user for <span id="r-cost">$2</span></button>
+            <button class="btn btn-primary btn-block" onclick="rAddUser(this)">Add user for <span id="r-cost">$2</span></button>
           </div>
         </div>
       </div>
@@ -969,7 +1009,7 @@ th.th-act { text-align: right; }
               <label for="eu-q">Find by HWID or username</label>
               <div style="display:flex;gap:10px">
                 <div class="inp-wrap" style="flex:1;min-width:0"><svg class="i"><use href="#i-search"/></svg><input class="inp" id="eu-q" placeholder="Search" autocomplete="off" onkeydown="if(event.key==='Enter')euSearch()"></div>
-                <button class="btn btn-ghost" style="height:auto" onclick="euSearch()">Find</button>
+                <button class="btn btn-ghost" style="height:auto" onclick="euSearch(this)">Find</button>
               </div>
             </div>
             <div id="eu-result" style="display:none">
@@ -978,7 +1018,7 @@ th.th-act { text-align: right; }
                 <div class="field"><label for="eu-newu">New username</label><input class="inp" id="eu-newu" placeholder="Leave blank to keep" autocomplete="off"></div>
                 <div class="field"><label for="eu-newh">New HWID</label><input class="inp" id="eu-newh" placeholder="Leave blank to keep" maxlength="32" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
               </div>
-              <button class="btn btn-primary btn-block" onclick="euSave()">Save changes</button>
+              <button class="btn btn-primary btn-block" onclick="euSave(this)">Save changes</button>
             </div>
           </div>
         </div>
@@ -999,7 +1039,7 @@ th.th-act { text-align: right; }
     <div class="modal-danger"><svg class="i i-sm"><use href="#i-alert"/></svg>This can’t be undone.</div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('modal-rm')">Cancel</button>
-      <button class="btn btn-danger-solid" onclick="doRemove()">Remove user</button>
+      <button class="btn btn-danger-solid" onclick="doRemove(this)">Remove user</button>
     </div>
   </div>
 </div>
@@ -1015,7 +1055,7 @@ th.th-act { text-align: right; }
     <div class="modal-danger"><svg class="i i-sm"><use href="#i-alert"/></svg>This can’t be undone.</div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('modal-rr')">Cancel</button>
-      <button class="btn btn-danger-solid" onclick="doRemoveRes()">Remove reseller</button>
+      <button class="btn btn-danger-solid" onclick="doRemoveRes(this)">Remove reseller</button>
     </div>
   </div>
 </div>
@@ -1037,11 +1077,12 @@ th.th-act { text-align: right; }
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="closeM('modal-setpw')">Cancel</button>
-      <button class="btn btn-primary" onclick="doSetPassword()">Save password</button>
+      <button class="btn btn-primary" onclick="doSetPassword(this)">Save password</button>
     </div>
   </div>
 </div>
 
+<div id="progress" aria-hidden="true"><i></i></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1063,6 +1104,85 @@ const money = n => '$' + Number(n || 0).toFixed(2);
 function empty(icon, title, text, action=''){
   return `<div class="empty"><div class="empty-ic">${ic(icon)}</div><div class="empty-t">${title}</div><div class="empty-s">${text}</div>${action}</div>`;
 }
+
+
+
+// ── GLOBAL PROGRESS BAR ──
+const bar = {
+  n: 0, v: 0, timer: null,
+  el: null,
+  set(v){ this.v = v; (this.el ||= document.querySelector('#progress i')).style.width = (v*100)+'%'; },
+  start(){
+    if(this.n++ > 0) return;
+    clearInterval(this.timer);
+    this.el ||= document.querySelector('#progress i');
+    const root = $('progress'); root.classList.add('on');
+    this.set(.1);
+    this.timer = setInterval(()=>this.set(this.v + (0.92 - this.v) * .1), 220);
+  },
+  done(){
+    if(--this.n > 0) return;
+    this.n = 0; clearInterval(this.timer);
+    this.set(1);
+    setTimeout(()=>{ if(this.n===0){ $('progress').classList.remove('on'); setTimeout(()=>{ if(this.n===0) this.set(0); }, 320); } }, 280);
+  }
+};
+
+// ── BUTTON ACTION RUNNER (loading → done / error) ──
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function run(btn, busyText, doneText, fn, holdMs=900, onError){
+  if(btn && btn.dataset.busy) return false;
+  let orig, scope;
+  if(btn){
+    orig = btn.innerHTML;
+    scope = btn.closest('.panel-body, .modal, .login-card');
+    btn.dataset.busy = '1';
+    btn.style.minWidth = btn.offsetWidth + 'px';
+    btn.innerHTML = `<span class="spin-ic"></span><span class="btn-label">${esc(busyText)}</span>`;
+    btn.classList.add('loading');
+    btn.setAttribute('aria-busy','true');
+    if(scope) scope.classList.add('busy');
+  }
+  const t0 = performance.now();
+  let ok = false;
+  try{
+    await fn();
+    ok = true;
+    const wait = Math.max(0, 600 - (performance.now() - t0));   // never flash too fast
+    if(wait) await sleep(wait);
+    if(btn){
+      btn.classList.remove('loading');
+      btn.classList.add('done');
+      btn.innerHTML = `${ic('check')}<span class="btn-label">${esc(doneText)}</span>`;
+      await sleep(holdMs);
+    }
+  }catch(e){
+    if(onError) onError(e); else toast(e.message || 'Something went wrong','err');
+    if(btn){ btn.classList.remove('loading'); btn.classList.add('shake'); await sleep(450); }
+  }finally{
+    if(btn){
+      btn.classList.remove('loading','done','shake');
+      btn.innerHTML = orig;
+      btn.style.minWidth = '';
+      btn.removeAttribute('aria-busy');
+      delete btn.dataset.busy;
+      if(scope) scope.classList.remove('busy');
+    }
+  }
+  return ok;
+}
+
+// ripple on every button press (works on touch too)
+document.addEventListener('pointerdown', e=>{
+  const b = e.target.closest('.btn');
+  if(!b || b.disabled || reduceMotion) return;
+  const r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2;
+  const s = document.createElement('span');
+  s.className = 'ripple';
+  s.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - r.left - d/2}px;top:${e.clientY - r.top - d/2}px`;
+  b.appendChild(s);
+  s.addEventListener('animationend', ()=>s.remove());
+}, {passive:true});
 
 // Count-up animation for numbers
 function setNum(el, to, opt={}){
@@ -1123,6 +1243,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   const token = loadToken();
   if(token){
     const err=$('login-err'); err.className='info'; err.textContent='Restoring your session…';
+    bar.start();
     try{
       const [users,resellers] = await Promise.all([
         fetch(WORKER_URL+'/users',{headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}}).then(r=>r.ok?r.json():Promise.reject()),
@@ -1136,11 +1257,12 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       }
       me={id:saved?.id||'admin',name:'Admin'}; role='admin'; startAdmin(); return;
     }catch{ clearToken(); err.textContent=''; err.className=''; }
+    finally{ bar.done(); }
   }
 });
 
 // ── API ──
-async function api(method, path, body=null){
+async function _api(method, path, body=null){
   const token=loadToken();
   const headers={'Content-Type':'application/json'};
   if(token) headers['Authorization']='Bearer '+token;
@@ -1152,7 +1274,7 @@ async function api(method, path, body=null){
   if(!r.ok) throw new Error(data.error||'Request failed');
   return data;
 }
-async function apiPublic(method, path, body=null){
+async function _apiPublic(method, path, body=null){
   const opts={method,headers:{'Content-Type':'application/json'}};
   if(body) opts.body=JSON.stringify(body);
   const r=await fetch(WORKER_URL+path,opts);
@@ -1160,6 +1282,8 @@ async function apiPublic(method, path, body=null){
   if(!r.ok) throw new Error(data.error||'Request failed');
   return data;
 }
+async function api(...a){ bar.start(); try{ return await _api(...a); } finally{ bar.done(); } }
+async function apiPublic(...a){ bar.start(); try{ return await _apiPublic(...a); } finally{ bar.done(); } }
 async function loadAll(){
   const [users,resellers]=await Promise.all([api('GET','/users'),api('GET','/resellers')]);
   allUsers=users; allRes=resellers;
@@ -1181,8 +1305,13 @@ function badge(e){
 const who = name => `<div class="who"><span class="av">${esc((name||'?')[0]).toUpperCase()}</span><span class="who-name">${esc(name)}</span></div>`;
 const hw  = (h,n) => `<button type="button" class="hw" title="Click to copy full HWID" data-hwid="${esc(h)}" onclick="copyHwid(this)">${esc(h.substring(0,n))}…</button>`;
 async function copyHwid(el){
-  try{ await navigator.clipboard.writeText(el.dataset.hwid); toast('HWID copied','ok'); }
-  catch{ toast('Couldn’t copy. Select the HWID manually.','err'); }
+  if(el.classList.contains('copied')) return;
+  try{
+    await navigator.clipboard.writeText(el.dataset.hwid);
+    const orig=el.innerHTML;
+    el.classList.add('copied'); el.innerHTML=`${ic('check','i i-sm')}Copied`;
+    setTimeout(()=>{ el.classList.remove('copied'); el.innerHTML=orig; },1100);
+  }catch{ toast('Couldn’t copy. Select the HWID manually.','err'); }
 }
 
 // ── SIDEBAR (mobile) ──
@@ -1227,42 +1356,36 @@ async function doLogin(){
   const err=$('login-err');
   const btn=$('login-btn');
   err.className='';
-  if(!id){err.textContent='Enter your Telegram ID';return;}
+  if(!id){err.textContent='Enter your user ID';return;}
   if(!pw){err.textContent='Enter your password';return;}
-  err.className='info'; err.textContent='';
-  btn.disabled=true; btn.classList.add('loading');
-  btn.querySelector('.btn-label').textContent='Signing in…';
-  try{
-    let data;
+  err.textContent='';
+  let session=null;
+  const ok=await run(btn,'Signing in…','Signed in',async()=>{
     if(loginType==='admin'){
-      data=await apiPublic('POST','/auth/admin',{id,password:pw});
+      const data=await apiPublic('POST','/auth/admin',{id,password:pw});
       saveToken(data.token, remember);
       if(remember) saveCreds(id, pw, 'admin'); else clearCreds();
       await loadAll();
-      me={id,name:'Admin'};
-      role='admin';
-      startAdmin();
+      session={role:'admin',me:{id,name:'Admin'}};
     } else {
-      data=await apiPublic('POST','/auth/reseller',{id,password:pw});
+      const data=await apiPublic('POST','/auth/reseller',{id,password:pw});
       saveToken(data.token, remember);
       if(remember) saveCreds(id, pw, 'reseller'); else clearCreds();
       await loadAll();
-      me={id,name:data.name,bal:data.balance};
-      role='reseller';
-      startReseller();
+      session={role:'reseller',me:{id,name:data.name,bal:data.balance}};
     }
-    loginAttempts=0;
-    $('att-bar').style.display='none';
-    err.textContent=''; err.className='';
-  } catch(e){
+  },650,e=>{
     loginAttempts++;
-    err.className='';
     err.textContent=e.message;
-    $('att-bar').style.display='block';
+    $('att-bar').classList.add('show');
     $('att-fill').style.width=(Math.min(loginAttempts,5)/5*100)+'%';
-  } finally{
-    btn.disabled=false; btn.classList.remove('loading');
-    btn.querySelector('.btn-label').textContent='Sign in';
+  });
+  if(ok){
+    loginAttempts=0;
+    $('att-bar').classList.remove('show');
+    err.textContent='';
+    role=session.role; me=session.me;
+    role==='admin' ? startAdmin() : startReseller();
   }
 }
 
@@ -1295,7 +1418,7 @@ function logout(){
   $('login-pw').value='';
   $('remember-me').checked=false;
   $('login-err').textContent='';
-  $('att-bar').style.display='none';
+  $('att-bar').classList.remove('show');
   allUsers=[]; allRes=[];
   document.querySelectorAll('.nav-pill').forEach(p=>{p.dataset.init='';p.classList.remove('on');});
 }
@@ -1329,10 +1452,10 @@ function renderDash(){
     : miniUserTable(rec,10);
   $('dash-res').innerHTML=!allRes.length
     ? empty('briefcase','No resellers yet','Add a reseller to start selling licenses.',`<button class="btn btn-primary btn-sm" onclick="nav('add-reseller')">${ic('plus','i i-sm')}Add reseller</button>`)
-    : `<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Telegram ID</th><th>Balance</th></tr></thead><tbody>${
+    : `<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>User ID</th><th>Balance</th></tr></thead><tbody>${
         allRes.map(r=>`<tr>
           <td data-label="Name">${who(r.name)}</td>
-          <td data-label="Telegram ID" class="mono-text">${esc(r.id)}</td>
+          <td data-label="User ID" class="mono-text">${esc(r.id)}</td>
           <td data-label="Balance" class="col-num">${money(r.balance)}</td>
         </tr>`).join('')
       }</tbody></table></div>`;
@@ -1362,12 +1485,12 @@ function renderResellers(){
   $('r-cnt').textContent=f.length;
   $('r-tbody').innerHTML=!f.length
     ? `<tr><td colspan="5" class="td-empty">${q
-        ? empty('search','No matches','Try a different name or Telegram ID.')
+        ? empty('search','No matches','Try a different name or user ID.')
         : empty('briefcase','No resellers yet','Add a reseller to start selling licenses.',`<button class="btn btn-primary btn-sm" onclick="nav('add-reseller')">${ic('plus','i i-sm')}Add reseller</button>`)}</td></tr>`
     : f.map((r,i)=>`<tr>
         <td class="col-idx">${i+1}</td>
         <td data-label="Name">${who(r.name)}</td>
-        <td data-label="Telegram ID" class="mono-text">${esc(r.id)}</td>
+        <td data-label="User ID" class="mono-text">${esc(r.id)}</td>
         <td data-label="Balance" class="col-num">${money(r.balance)}</td>
         <td class="col-act"><div class="row-actions">
           <button class="btn btn-ghost btn-sm" data-id="${esc(r.id)}" onclick="quickBal(this.dataset.id)">${ic('wallet','i i-sm')}Balance</button>
@@ -1399,29 +1522,29 @@ function selVal(el,d){
   document.querySelectorAll('#au-vals .val-card').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel'); selDays=d;
 }
-async function addUser(){
+async function addUser(btn){
   const h=$('au-hwid').value.trim();
   const u=$('au-user').value.trim();
   if(!validHwid(h)){toast('Invalid HWID. It must be 32 hex characters.','err');return;}
   if(!u){toast('Enter a username','err');return;}
-  try{
+  await run(btn,'Adding user…','User added',async()=>{
     await api('POST','/users',{username:u,hwid:h,expire:addDays(selDays)});
     toast(`User “${u}” added`,'ok');
     $('au-hwid').value='';
     $('au-user').value='';
     await loadAll();renderAll();
-  }catch(e){toast(e.message,'err');}
+  });
 }
 
-async function addReseller(){
+async function addReseller(btn){
   const id=$('ar-id').value.trim();
   const name=$('ar-name').value.trim();
   const bal=parseFloat($('ar-bal').value)||0;
   const pw=$('ar-pw').value;
-  if(!id||!/^\d+$/.test(id)){toast('Enter a valid Telegram ID','err');return;}
+  if(!id||!/^\d+$/.test(id)){toast('Enter a valid user ID','err');return;}
   if(!name){toast('Enter a name','err');return;}
   if(!pw||pw.length<4){toast('Password must be at least 4 characters','err');return;}
-  try{
+  await run(btn,'Creating…','Reseller created',async()=>{
     await api('POST','/resellers',{id,name,balance:bal,password:pw});
     toast(`Reseller “${name}” created`,'ok');
     $('ar-id').value='';
@@ -1429,21 +1552,21 @@ async function addReseller(){
     $('ar-bal').value='';
     $('ar-pw').value='';
     await loadAll();renderAll();fillResSel();
-  }catch(e){toast(e.message,'err');}
+  });
 }
 
-async function addBalance(){
+async function addBalance(btn){
   const id=$('ab-sel').value;
   const amt=parseFloat($('ab-amt').value)||0;
   if(!id){toast('Select a reseller','err');return;}
   if(amt<=0){toast('Enter a valid amount','err');return;}
-  try{
+  await run(btn,'Adding balance…','Balance added',async()=>{
     await api('POST','/balance',{id,amount:amt});
     toast(`${money(amt)} added`,'ok');
     $('ab-amt').value='';
     await loadAll();renderAll();fillResSel();
     $('ab-sel').value=id; abChange();
-  }catch(e){toast(e.message,'err');}
+  });
 }
 
 // ── REMOVE ──
@@ -1453,28 +1576,28 @@ function openRm(h,u){
   $('rm-info').innerHTML=`<strong>${esc(u)}</strong><br><span class="mono-text">${esc(h)}</span>`;
   openM('modal-rm');
 }
-async function doRemove(){
+async function doRemove(btn){
   if(!rmHwid)return;
-  try{
-    await api('DELETE','/users',{hwid:rmHwid});
-    toast('User removed','ok'); closeM('modal-rm');
-    await loadAll();renderAll();
-  }catch(e){toast(e.message,'err');}
-  rmHwid=null;
+  const h=rmHwid;
+  const ok=await run(btn,'Removing…','Removed',async()=>{
+    await api('DELETE','/users',{hwid:h});
+    await loadAll();
+  },600);
+  if(ok){ toast('User removed','ok'); closeM('modal-rm'); renderAll(); rmHwid=null; }
 }
 function openRr(id,name){
   rmResId=id;
   $('rr-info').innerHTML=`<strong>${esc(name)}</strong> <span class="mono-text">(${esc(id)})</span>`;
   openM('modal-rr');
 }
-async function doRemoveRes(){
+async function doRemoveRes(btn){
   if(!rmResId)return;
-  try{
-    await api('DELETE','/resellers',{id:rmResId});
-    toast('Reseller removed','ok'); closeM('modal-rr');
-    await loadAll();renderAll();fillResSel();
-  }catch(e){toast(e.message,'err');}
-  rmResId=null;
+  const id=rmResId;
+  const ok=await run(btn,'Removing…','Removed',async()=>{
+    await api('DELETE','/resellers',{id});
+    await loadAll();
+  },600);
+  if(ok){ toast('Reseller removed','ok'); closeM('modal-rr'); renderAll(); fillResSel(); rmResId=null; }
 }
 function openSetPw(id,name){
   setPwId=id;
@@ -1483,15 +1606,16 @@ function openSetPw(id,name){
   openM('modal-setpw');
   setTimeout(()=>{ if(matchMedia('(hover:hover)').matches) $('setpw-input').focus(); },300);
 }
-async function doSetPassword(){
+async function doSetPassword(btn){
   if(!setPwId)return;
+  btn = btn || $('modal-setpw').querySelector('.btn-primary');
   const pw=$('setpw-input').value;
   if(!pw||pw.length<4){toast('Password must be at least 4 characters','err');return;}
-  try{
-    await api('POST','/auth/setpassword-portal',{reseller_id:setPwId,password:pw});
-    toast('Password updated','ok'); closeM('modal-setpw');
-  }catch(e){toast(e.message,'err');}
-  setPwId=null;
+  const id=setPwId;
+  const ok=await run(btn,'Saving…','Saved',async()=>{
+    await api('POST','/auth/setpassword-portal',{reseller_id:id,password:pw});
+  },600);
+  if(ok){ toast('Password updated','ok'); closeM('modal-setpw'); setPwId=null; }
 }
 function closeM(id){ $(id).classList.remove('open'); }
 document.addEventListener('keydown',e=>{
@@ -1524,9 +1648,9 @@ function renderRDash(){
 function selRVal(el,d,p){
   document.querySelectorAll('#rau-vals .val-card').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel'); rSelDays=d; rSelPrice=p;
-  $('r-cost').textContent='$'+p;
+  setNum($('r-cost'),p,{pre:'$'});
 }
-async function rAddUser(){
+async function rAddUser(btn){
   const h=$('rau-hwid').value.trim();
   const u=$('rau-user').value.trim();
   if(!validHwid(h)){toast('Invalid HWID. It must be 32 hex characters.','err');return;}
@@ -1535,13 +1659,13 @@ async function rAddUser(){
   const bal=r?r.balance:0;
   if(bal<rSelPrice){toast(`Not enough balance. Need $${rSelPrice}, have ${money(bal)}`,'err');return;}
   const fn=me.name+'_'+u;
-  try{
+  await run(btn,'Adding user…','User added',async()=>{
     await api('POST','/users',{username:fn,hwid:h,expire:addDays(rSelDays),days:rSelDays});
     toast(`User “${u}” added`,'ok');
     $('rau-hwid').value='';
     $('rau-user').value='';
     await loadAll();renderAll();
-  }catch(e){toast(e.message,'err');}
+  });
 }
 function renderMyUsers(){
   const q=($('ru-search')||{value:''}).value.toLowerCase();
@@ -1561,31 +1685,43 @@ function renderMyUsers(){
         <td class="col-act"><div class="row-actions"><button class="btn btn-danger btn-sm" data-h="${esc(u.hwid)}" data-u="${esc(u.username)}" onclick="openRm(this.dataset.h,this.dataset.u)">${ic('trash','i i-sm')}Remove</button></div></td>
       </tr>`).join('');
 }
-function euSearch(){
+async function euSearch(btn){
+  btn = btn || $('page-r-edit').querySelector('.btn-ghost');
   const q=$('eu-q').value.trim().toLowerCase();
+  if(!q){toast('Enter a HWID or username','err');return;}
   euEntry=null;
-  const found=allUsers.find(u=>u.hwid.toLowerCase()===q||u.username.toLowerCase()===q||u.username.split('_').pop().toLowerCase()===q);
-  if(!found){toast('User not found','err');$('eu-result').style.display='none';return;}
+  $('eu-result').style.display='none';
+  let found=null;
+  const ok=await run(btn,'Finding…','Found',async()=>{
+    await loadAll();                                  // search against fresh data
+    found=allUsers.find(u=>u.hwid.toLowerCase()===q||u.username.toLowerCase()===q||u.username.split('_').pop().toLowerCase()===q);
+    if(!found) throw new Error('User not found');
+  },450);
+  if(!ok) return;
   euEntry=found;
   const res=$('eu-result');
   res.style.display='block';
   res.classList.remove('reveal'); void res.offsetWidth; res.classList.add('reveal');
   $('eu-info').innerHTML=`<strong>Username:</strong> ${esc(found.username)}<br><strong>HWID:</strong> <span class="mono-text">${esc(found.hwid)}</span><br><strong>Expires:</strong> ${esc(found.expire)}`;
 }
-async function euSave(){
+async function euSave(btn){
   if(!euEntry)return;
   const nu=$('eu-newu').value.trim();
   const nh=$('eu-newh').value.trim();
   if(nh&&!validHwid(nh)){toast('Invalid HWID','err');return;}
-  try{
-    await api('PUT','/users',{old_hwid:euEntry.hwid,new_username:nu||undefined,new_hwid:nh||undefined});
+  const old=euEntry.hwid;
+  const ok=await run(btn,'Saving…','Saved',async()=>{
+    await api('PUT','/users',{old_hwid:old,new_username:nu||undefined,new_hwid:nh||undefined});
+    await loadAll();
+  },700);
+  if(ok){
     toast('User updated','ok');
     $('eu-result').style.display='none';
     $('eu-q').value='';
     $('eu-newu').value='';
     $('eu-newh').value='';
-    await loadAll();renderAll();
-  }catch(e){toast(e.message,'err');}
+    renderAll();
+  }
 }
 
 // ── SYNC ──
@@ -1593,11 +1729,13 @@ async function syncAll(){
   const b=$('sync-btn');
   if(b.disabled) return;
   b.classList.add('spin'); b.disabled=true;
+  $('content').classList.add('loading-data');
   try{
     await Promise.all([loadAll(), new Promise(r=>setTimeout(r,600))]);
     renderAll(); toast('Data synced','ok');
   }catch{ toast('Sync failed. Check your connection.','err'); }
   b.classList.remove('spin'); b.disabled=false;
+  $('content').classList.remove('loading-data');
 }
 
 // ── NAV ──
