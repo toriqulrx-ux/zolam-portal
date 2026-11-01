@@ -1,133 +1,258 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ZOLAM FF Panel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZOLAM FF — Portal</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
-  :root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--border:#2a2a3a;--accent:#6c5ce7;--accent2:#a29bfe;--green:#00b894;--red:#d63031;--yellow:#fdcb6e;--text:#e8e8f0;--text2:#888899;--text3:#555566;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;}
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;}
-  /* SIDEBAR */
-  #sidebar{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
-  .logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);}
-  .logo-title{font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--accent2);}
-  .logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
-  nav{flex:1;padding:12px 0;}
-  .nav-section{padding:10px 20px 4px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--text2);font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;border-left:3px solid transparent;}
-  .nav-item:hover{background:var(--bg3);color:var(--text);}
-  .nav-item.active{background:var(--bg3);color:var(--accent2);border-left-color:var(--accent);}
-  .sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);}
-  .role-badge{display:inline-block;background:var(--accent);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-top:4px;}
-  .role-badge.reseller{background:var(--green);}
-  /* MAIN */
-  #main{margin-left:220px;flex:1;display:flex;flex-direction:column;}
-  #topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50;}
-  .page-title{font-size:15px;font-weight:600;}
-  .sync-btn{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;font-family:var(--sans);}
-  .sync-btn:hover{border-color:var(--accent);color:var(--accent2);}
-  #content{padding:24px;flex:1;}
-  .page{display:none;} .page.active{display:block;}
-  /* STATS */
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
-  .stat-label{font-size:11px;color:var(--text3);font-weight:500;margin-bottom:8px;}
-  .stat-value{font-size:26px;font-weight:700;font-family:var(--mono);}
-  .stat-card.green .stat-value{color:var(--green);}
-  .stat-card.purple .stat-value{color:var(--accent2);}
-  .stat-card.yellow .stat-value{color:var(--yellow);}
-  /* PANEL */
-  .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
-  .panel-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
-  .panel-title{font-size:13px;font-weight:600;}
-  .panel-body{padding:20px;}
-  .tbl-wrap{overflow-x:auto;}
-  table{width:100%;border-collapse:collapse;}
-  th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:0.5px;}
-  td{padding:11px 14px;font-size:13px;border-bottom:1px solid #1c1c28;vertical-align:middle;}
-  tr:last-child td{border-bottom:none;}
-  tr:hover td{background:#13131e;}
-  .mono{font-family:var(--mono);font-size:11px;color:var(--text2);}
-  /* BADGE */
-  .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
-  .badge-green{background:#00b89420;color:var(--green);}
-  .badge-red{background:#d6303120;color:var(--red);}
-  /* BUTTONS */
-  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--sans);transition:opacity 0.15s;}
-  .btn:hover{opacity:0.85;}
-  .btn-primary{background:var(--accent);color:#fff;}
-  .btn-green{background:var(--green);color:#fff;}
-  .btn-red{background:var(--red);color:#fff;}
-  .btn-ghost{background:var(--bg3);border:1px solid var(--border);color:var(--text2);}
-  .btn-sm{padding:5px 10px;font-size:12px;}
-  /* FORM */
-  .search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
-  .search-input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;}
-  .search-input:focus{border-color:var(--accent);}
-  .search-input::placeholder{color:var(--text3);}
-  .form-grid{display:grid;gap:14px;}
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .form-group{display:flex;flex-direction:column;gap:6px;}
-  .form-label{font-size:12px;font-weight:500;color:var(--text2);}
-  .form-input,.form-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;}
-  .form-input:focus,.form-select:focus{border-color:var(--accent);}
-  .form-input::placeholder{color:var(--text3);}
-  /* VALIDITY */
-  .validity-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:10px 0;}
-  .validity-card{background:var(--bg3);border:2px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:border-color 0.15s;}
-  .validity-card:hover,.validity-card.selected{border-color:var(--accent);background:#6c5ce715;}
-  .validity-days{font-size:16px;font-weight:700;}
-  .validity-label{font-size:10px;color:var(--text3);margin-top:2px;}
-  .validity-price{font-size:13px;font-weight:600;color:var(--accent2);margin-top:6px;}
-  /* MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:460px;max-width:95vw;}
-  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-  .modal-title{font-size:15px;font-weight:600;}
-  .modal-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:20px;}
-  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-  /* TOAST */
-  #toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 18px;font-size:13px;z-index:999;transform:translateY(80px);opacity:0;transition:transform 0.25s,opacity 0.25s;max-width:300px;}
-  #toast.show{transform:translateY(0);opacity:1;}
-  #toast.success{border-color:var(--green);color:var(--green);}
-  #toast.error{border-color:var(--red);color:var(--red);}
-  /* LOGIN */
-  #login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;}
-  .login-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:36px;width:360px;max-width:95vw;}
-  .login-logo{font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:4px;}
-  .login-sub{font-size:12px;color:var(--text3);margin-bottom:28px;}
-  .login-tabs{display:flex;background:var(--bg3);border-radius:8px;padding:3px;margin-bottom:20px;}
-  .login-tab{flex:1;text-align:center;padding:8px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background 0.15s;}
-  .login-tab.active{background:var(--bg2);color:var(--text);}
-  .login-btn{width:100%;margin-top:16px;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans);}
-  /* RESELLER HERO */
-  .balance-hero{background:linear-gradient(135deg,#6c5ce7,#a29bfe);border-radius:10px;padding:24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
-  .balance-amount{font-size:36px;font-weight:700;font-family:var(--mono);}
-  .empty{text-align:center;padding:40px;color:var(--text3);}
-  @keyframes spin{to{transform:rotate(360deg)}}
-</style>
-</head>
-<body>
+/* Layout: sidebar + main, full-height dashboard */
+:root {
+  --bg:      #0d0d12;
+  --bg2:     #13131a;
+  --bg3:     #1c1c26;
+  --border:  #252533;
+  --accent:  #7c6af7;
+  --accent2: #a89fff;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --yellow:  #f59e0b;
+  --text:    #e8e8f2;
+  --text2:   #8888aa;
+  --text3:   #44445a;
+  --mono:    'JetBrains Mono', monospace;
+  --sans:    'Inter', system-ui, sans-serif;
+  --radius:  8px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg:     #f4f4f8;
+    --bg2:    #ffffff;
+    --bg3:    #f0f0f5;
+    --border: #e0e0ea;
+    --text:   #111120;
+    --text2:  #555570;
+    --text3:  #aaaacc;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg:     #f4f4f8;
+  --bg2:    #ffffff;
+  --bg3:    #f0f0f5;
+  --border: #e0e0ea;
+  --text:   #111120;
+  --text2:  #555570;
+  --text3:  #aaaacc;
+  color-scheme: light;
+}
 
-<!-- LOGIN -->
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--sans); font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── LOGIN ── */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  padding-left: max(16px, env(safe-area-inset-left,0px));
+  padding-right: max(16px, env(safe-area-inset-right,0px));
+}
+.login-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 36px;
+  width: 360px; max-width: 100%;
+}
+.login-logo { font-size: 22px; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; }
+.login-sub { font-size: 12px; color: var(--text3); margin-top: 3px; margin-bottom: 24px; font-family: var(--mono); }
+.login-tabs { display: flex; background: var(--bg3); border-radius: 8px; padding: 3px; margin-bottom: 20px; }
+.ltab { flex: 1; text-align: center; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2); transition: background .15s, color .15s; }
+.ltab.active { background: var(--bg2); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.login-btn {
+  width: 100%; margin-top: 14px; padding: 11px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600; cursor: pointer; font-family: var(--sans);
+  transition: opacity .15s;
+}
+.login-btn:hover { opacity: .85; }
+#login-err { color: var(--red); font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 210px; min-height: 100%;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
+  transition: transform .25s;
+}
+.logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+.logo-title { font-size: 17px; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; }
+.logo-sub { font-size: 10px; color: var(--text3); margin-top: 2px; font-family: var(--mono); }
+nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+.nav-sec { padding: 10px 18px 3px; font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 18px; cursor: pointer;
+  color: var(--text2); font-size: 13px; font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background .12s, color .12s;
+}
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active { background: var(--bg3); color: var(--accent2); border-left-color: var(--accent); }
+.sidebar-footer { padding: 14px 18px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text3); }
+.role-badge { display: inline-block; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 4px; }
+.role-badge.res { background: var(--green); }
+.signout { cursor: pointer; color: var(--text3); font-size: 11px; margin-top: 8px; display: inline-block; }
+.signout:hover { color: var(--red); }
+
+/* ── MAIN ── */
+#main {
+  margin-left: 210px; flex: 1;
+  display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
+}
+#topbar {
+  height: 52px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 22px;
+  position: sticky; top: 0; z-index: 50; flex-shrink: 0;
+}
+.page-title { font-size: 14px; font-weight: 600; }
+.sync-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text2); padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; font-size: 12px; font-family: var(--sans);
+  transition: border-color .15s, color .15s;
+}
+.sync-btn:hover { border-color: var(--accent); color: var(--accent2); }
+#content { padding: 22px; flex: 1; overflow-y: auto; }
+.page { display: none; } .page.active { display: block; }
+
+/* ── STATS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+.stat-label { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.stat-val { font-size: 28px; font-weight: 700; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.stat-card.c-green .stat-val { color: var(--green); }
+.stat-card.c-purple .stat-val { color: var(--accent2); }
+.stat-card.c-yellow .stat-val { color: var(--yellow); }
+
+/* ── PANEL ── */
+.panel { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 18px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+.panel-title { font-size: 13px; font-weight: 600; }
+.panel-body { padding: 18px; }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 9px 13px; font-size: 11px; font-weight: 600; color: var(--text3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .5px; }
+td { padding: 10px 13px; font-size: 13px; border-bottom: 1px solid var(--bg3); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(124,106,247,.04); }
+.mono { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+/* ── BADGE ── */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-g { background: rgba(34,197,94,.12); color: var(--green); }
+.badge-r { background: rgba(239,68,68,.12); color: var(--red); }
+.badge-y { background: rgba(245,158,11,.12); color: var(--yellow); }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 13px; font-weight: 500; font-family: var(--sans); transition: opacity .15s; }
+.btn:hover { opacity: .82; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-green   { background: var(--green); color: #fff; }
+.btn-red     { background: var(--red); color: #fff; }
+.btn-ghost   { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+
+/* ── FORM ── */
+.search-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.search-input { flex: 1; min-width: 0; background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: var(--radius); font-size: 13px; font-family: var(--sans); outline: none; }
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--text3); }
+.form-grid { display: grid; gap: 13px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+.form-input, .form-select { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 9px 11px; border-radius: var(--radius); font-size: 13px; font-family: var(--sans); outline: none; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--text3); }
+.full-btn { width: 100%; justify-content: center; padding: 11px; }
+
+/* ── VALIDITY CARDS ── */
+.val-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; }
+.val-card { background: var(--bg3); border: 2px solid var(--border); border-radius: var(--radius); padding: 10px 6px; text-align: center; cursor: pointer; transition: border-color .15s; }
+.val-card:hover, .val-card.sel { border-color: var(--accent); background: rgba(124,106,247,.1); }
+.val-days { font-size: 16px; font-weight: 700; }
+.val-label { font-size: 10px; color: var(--text3); margin-top: 1px; }
+.val-price { font-size: 12px; font-weight: 600; color: var(--accent2); margin-top: 5px; }
+
+/* ── MODAL ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 22px; width: 420px; max-width: 100%; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.modal-title { font-size: 14px; font-weight: 600; }
+.modal-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 20px; line-height: 1; }
+.modal-foot { display: flex; gap: 9px; justify-content: flex-end; margin-top: 18px; }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 22px; right: 22px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 16px; font-size: 13px; z-index: 999; transform: translateY(70px); opacity: 0; transition: transform .22s, opacity .22s; max-width: 280px; }
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.ok { border-color: var(--green); color: var(--green); }
+#toast.err { border-color: var(--red); color: var(--red); }
+
+/* ── RESELLER HERO ── */
+.bal-hero { background: linear-gradient(135deg,#5b4be0,#8b7fff); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+.bal-amount { font-size: 34px; font-weight: 700; font-family: var(--mono); color: #fff; font-variant-numeric: tabular-nums; }
+.bal-label { font-size: 12px; opacity: .75; color: #fff; margin-bottom: 4px; }
+.bal-sub { font-size: 11px; opacity: .6; color: #fff; margin-top: 3px; }
+.empty { text-align: center; padding: 36px; color: var(--text3); }
+
+/* ── INFO BOX ── */
+.info-box { background: var(--bg3); border-radius: var(--radius); padding: 12px; font-size: 12px; color: var(--text2); }
+.info-box strong { color: var(--text); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  #sidebar { transform: translateX(-100%); }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .val-grid { grid-template-columns: repeat(3,1fr); }
+  .form-row { grid-template-columns: 1fr; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">ZOLAM FF</div>
-    <div class="login-sub">Telegram ID দিয়ে login করো</div>
+    <div class="login-sub">controller panel</div>
     <div class="login-tabs">
-      <div class="login-tab active" onclick="setTab('admin',this)">Admin</div>
-      <div class="login-tab" onclick="setTab('reseller',this)">Reseller</div>
+      <div class="ltab active" onclick="setTab('admin',this)">Admin</div>
+      <div class="ltab" onclick="setTab('reseller',this)">Reseller</div>
     </div>
     <div class="form-group">
       <label class="form-label">Telegram ID</label>
-      <input class="form-input" type="number" id="login-id" placeholder="e.g. 8179239922">
+      <input class="form-input" type="number" id="login-id" placeholder="e.g. 8179239922" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="login-btn" onclick="doLogin()">Login</button>
-    <div id="login-err" style="color:var(--red);font-size:12px;margin-top:10px;text-align:center;"></div>
+    <div id="login-err"></div>
   </div>
 </div>
 
@@ -137,89 +262,90 @@
     <div class="logo-title">ZOLAM FF</div>
     <div class="logo-sub">Controller Panel</div>
   </div>
-  <nav id="nav-admin" style="display:none;">
-    <div class="nav-section">Admin</div>
-    <div class="nav-item active" onclick="showPage('dashboard')">⬡ Dashboard</div>
-    <div class="nav-item" onclick="showPage('users')">◈ Users</div>
-    <div class="nav-item" onclick="showPage('add-user')">＋ Add User</div>
-    <div class="nav-section">Resellers</div>
-    <div class="nav-item" onclick="showPage('resellers')">◉ Reseller List</div>
-    <div class="nav-item" onclick="showPage('add-reseller')">＋ Add Reseller</div>
-    <div class="nav-item" onclick="showPage('add-balance')">＄ Add Balance</div>
+  <nav id="nav-admin" style="display:none">
+    <div class="nav-sec">Admin</div>
+    <div class="nav-item active" onclick="nav('dashboard')">⬡ Dashboard</div>
+    <div class="nav-item" onclick="nav('users')">◈ Users</div>
+    <div class="nav-item" onclick="nav('add-user')">＋ Add User</div>
+    <div class="nav-sec">Resellers</div>
+    <div class="nav-item" onclick="nav('resellers')">◉ Reseller List</div>
+    <div class="nav-item" onclick="nav('add-reseller')">＋ Add Reseller</div>
+    <div class="nav-item" onclick="nav('add-balance')">＄ Add Balance</div>
   </nav>
-  <nav id="nav-reseller" style="display:none;">
-    <div class="nav-section">Reseller</div>
-    <div class="nav-item active" onclick="showPage('r-dashboard')">⬡ Dashboard</div>
-    <div class="nav-item" onclick="showPage('r-add-user')">＋ Add User</div>
-    <div class="nav-item" onclick="showPage('r-my-users')">◈ My Users</div>
-    <div class="nav-item" onclick="showPage('r-edit-user')">✎ Edit User</div>
+  <nav id="nav-reseller" style="display:none">
+    <div class="nav-sec">Reseller</div>
+    <div class="nav-item active" onclick="nav('r-dash')">⬡ Dashboard</div>
+    <div class="nav-item" onclick="nav('r-add')">＋ Add User</div>
+    <div class="nav-item" onclick="nav('r-users')">◈ My Users</div>
+    <div class="nav-item" onclick="nav('r-edit')">✎ Edit User</div>
   </nav>
   <div class="sidebar-footer">
-    <div id="sb-name">—</div>
+    <div id="sb-name" style="font-weight:600;color:var(--text)">—</div>
     <div id="sb-badge" class="role-badge">—</div>
-    <div style="margin-top:8px;"><span style="cursor:pointer;color:var(--text3);font-size:12px;" onclick="logout()">Sign out</span></div>
+    <div class="signout" onclick="logout()">Sign out</div>
   </div>
 </div>
 
 <!-- MAIN -->
 <div id="main">
   <div id="topbar">
-    <div class="page-title" id="topbar-title">Dashboard</div>
-    <button class="sync-btn" onclick="syncData()"><span id="sync-icon">↻</span> Sync</button>
+    <div class="page-title" id="tb-title">Dashboard</div>
+    <button class="sync-btn" onclick="syncAll()"><span id="sync-ic">↻</span> Sync</button>
   </div>
   <div id="content">
 
     <!-- ADMIN DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="stats-grid">
-        <div class="stat-card green"><div class="stat-label">Active Users</div><div class="stat-value" id="s-active">—</div></div>
-        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value" id="s-total">—</div></div>
-        <div class="stat-card yellow"><div class="stat-label">Expired</div><div class="stat-value" id="s-exp">—</div></div>
-        <div class="stat-card purple"><div class="stat-label">Resellers</div><div class="stat-value" id="s-res">—</div></div>
+        <div class="stat-card c-green"><div class="stat-label">Active Users</div><div class="stat-val" id="s-active">—</div></div>
+        <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-val" id="s-total">—</div></div>
+        <div class="stat-card c-yellow"><div class="stat-label">Expired</div><div class="stat-val" id="s-exp">—</div></div>
+        <div class="stat-card c-purple"><div class="stat-label">Resellers</div><div class="stat-val" id="s-res">—</div></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">Recent Users</div><button class="btn btn-ghost btn-sm" onclick="showPage('users')">View All</button></div>
-        <div class="panel-body" id="dash-users"><div class="empty">Loading...</div></div>
+        <div class="panel-head"><div class="panel-title">Recent Users</div><button class="btn btn-ghost btn-sm" onclick="nav('users')">View All</button></div>
+        <div class="panel-body" id="dash-users"><div class="empty">Loading…</div></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">Resellers</div><button class="btn btn-ghost btn-sm" onclick="showPage('resellers')">View All</button></div>
-        <div class="panel-body" id="dash-resellers"><div class="empty">Loading...</div></div>
+        <div class="panel-head"><div class="panel-title">Resellers</div><button class="btn btn-ghost btn-sm" onclick="nav('resellers')">View All</button></div>
+        <div class="panel-body" id="dash-res"><div class="empty">Loading…</div></div>
       </div>
     </div>
 
     <!-- USERS -->
     <div class="page" id="page-users">
       <div class="search-bar">
-        <input class="search-input" id="user-search" placeholder="Search username or HWID..." oninput="renderUsers()">
-        <button class="btn btn-primary" onclick="showPage('add-user')">＋ Add</button>
+        <input class="search-input" id="u-search" placeholder="Search username or HWID…" oninput="renderUsers()">
+        <button class="btn btn-primary" onclick="nav('add-user')">＋ Add</button>
       </div>
       <div class="panel">
-        <div class="panel-head"><div class="panel-title" id="users-cnt">Users</div></div>
+        <div class="panel-head"><div class="panel-title" id="u-cnt">Users</div></div>
         <div class="tbl-wrap"><table>
           <thead><tr><th>#</th><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th><th>Action</th></tr></thead>
-          <tbody id="users-tbody"></tbody>
+          <tbody id="u-tbody"></tbody>
         </table></div>
       </div>
     </div>
 
     <!-- ADD USER -->
     <div class="page" id="page-add-user">
-      <div class="panel" style="max-width:540px;">
+      <div class="panel" style="max-width:520px">
         <div class="panel-head"><div class="panel-title">Add User</div></div>
         <div class="panel-body">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">HWID (32 hex)</label><input class="form-input" id="au-hwid" placeholder="32 character hex" maxlength="32"></div>
             <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="au-user" placeholder="Player username"></div>
-            <div class="form-group"><label class="form-label">Validity</label>
-              <div class="validity-grid">
-                <div class="validity-card selected" onclick="selVal(this,1)"><div class="validity-days">1</div><div class="validity-label">Day</div><div class="validity-price">$2</div></div>
-                <div class="validity-card" onclick="selVal(this,3)"><div class="validity-days">3</div><div class="validity-label">Days</div><div class="validity-price">$4</div></div>
-                <div class="validity-card" onclick="selVal(this,7)"><div class="validity-days">7</div><div class="validity-label">Days</div><div class="validity-price">$8</div></div>
-                <div class="validity-card" onclick="selVal(this,15)"><div class="validity-days">15</div><div class="validity-label">Days</div><div class="validity-price">$10</div></div>
-                <div class="validity-card" onclick="selVal(this,30)"><div class="validity-days">30</div><div class="validity-label">Days</div><div class="validity-price">$15</div></div>
+            <div class="form-group">
+              <label class="form-label">Validity</label>
+              <div class="val-grid" id="au-vals">
+                <div class="val-card sel" onclick="selVal(this,1)"><div class="val-days">1</div><div class="val-label">Day</div><div class="val-price">$2</div></div>
+                <div class="val-card" onclick="selVal(this,3)"><div class="val-days">3</div><div class="val-label">Days</div><div class="val-price">$4</div></div>
+                <div class="val-card" onclick="selVal(this,7)"><div class="val-days">7</div><div class="val-label">Days</div><div class="val-price">$8</div></div>
+                <div class="val-card" onclick="selVal(this,15)"><div class="val-days">15</div><div class="val-label">Days</div><div class="val-price">$10</div></div>
+                <div class="val-card" onclick="selVal(this,30)"><div class="val-days">30</div><div class="val-label">Days</div><div class="val-price">$15</div></div>
               </div>
             </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="addUser()">Add User</button>
+            <button class="btn btn-primary full-btn" onclick="addUser()">Add User</button>
           </div>
         </div>
       </div>
@@ -228,28 +354,28 @@
     <!-- RESELLERS -->
     <div class="page" id="page-resellers">
       <div class="search-bar">
-        <input class="search-input" id="res-search" placeholder="Search reseller..." oninput="renderResellers()">
-        <button class="btn btn-primary" onclick="showPage('add-reseller')">＋ Add</button>
+        <input class="search-input" id="r-search" placeholder="Search reseller…" oninput="renderResellers()">
+        <button class="btn btn-primary" onclick="nav('add-reseller')">＋ Add</button>
       </div>
       <div class="panel">
-        <div class="panel-head"><div class="panel-title" id="res-cnt">Resellers</div></div>
+        <div class="panel-head"><div class="panel-title" id="r-cnt">Resellers</div></div>
         <div class="tbl-wrap"><table>
           <thead><tr><th>#</th><th>Name</th><th>Telegram ID</th><th>Balance</th><th>Action</th></tr></thead>
-          <tbody id="res-tbody"></tbody>
+          <tbody id="r-tbody"></tbody>
         </table></div>
       </div>
     </div>
 
     <!-- ADD RESELLER -->
     <div class="page" id="page-add-reseller">
-      <div class="panel" style="max-width:460px;">
+      <div class="panel" style="max-width:440px">
         <div class="panel-head"><div class="panel-title">Add Reseller</div></div>
         <div class="panel-body">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Telegram ID</label><input class="form-input" id="ar-id" placeholder="e.g. 8098128197" type="number"></div>
             <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="ar-name" placeholder="Reseller name"></div>
             <div class="form-group"><label class="form-label">Initial Balance ($)</label><input class="form-input" id="ar-bal" placeholder="e.g. 50" type="number" step="0.01"></div>
-            <button class="btn btn-green" style="width:100%;justify-content:center;padding:11px;" onclick="addReseller()">Add Reseller</button>
+            <button class="btn btn-green full-btn" onclick="addReseller()">Add Reseller</button>
           </div>
         </div>
       </div>
@@ -257,76 +383,76 @@
 
     <!-- ADD BALANCE -->
     <div class="page" id="page-add-balance">
-      <div class="panel" style="max-width:460px;">
+      <div class="panel" style="max-width:440px">
         <div class="panel-head"><div class="panel-title">Add Balance</div></div>
         <div class="panel-body">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Select Reseller</label>
-              <select class="form-select" id="ab-sel"><option value="">— Select —</option></select>
+              <select class="form-select" id="ab-sel" onchange="abChange()"><option value="">— Select —</option></select>
             </div>
-            <div id="ab-info" style="display:none;background:var(--bg3);border-radius:8px;padding:12px;">
-              <div style="font-size:11px;color:var(--text3);">Current Balance</div>
-              <div id="ab-cur" style="font-size:20px;font-weight:700;color:var(--green);font-family:var(--mono);"></div>
+            <div id="ab-info" style="display:none" class="info-box">
+              Current Balance: <strong id="ab-cur" style="color:var(--green);font-family:var(--mono)"></strong>
             </div>
             <div class="form-group"><label class="form-label">Amount ($)</label><input class="form-input" id="ab-amt" placeholder="e.g. 25" type="number" step="0.01"></div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="addBalance()">Add Balance</button>
+            <button class="btn btn-primary full-btn" onclick="addBalance()">Add Balance</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- RESELLER DASHBOARD -->
-    <div class="page" id="page-r-dashboard">
-      <div class="balance-hero">
+    <div class="page" id="page-r-dash">
+      <div class="bal-hero">
         <div>
-          <div style="font-size:13px;opacity:0.8;margin-bottom:4px;" id="r-name">—</div>
-          <div class="balance-amount" id="r-bal">$0.00</div>
-          <div style="font-size:12px;opacity:0.7;margin-top:2px;">Available balance</div>
+          <div class="bal-label" id="r-name">—</div>
+          <div class="bal-amount" id="r-bal">$0.00</div>
+          <div class="bal-sub">Available balance</div>
         </div>
-        <div style="font-size:48px;opacity:0.4;">◈</div>
+        <div style="font-size:52px;opacity:.25;color:#fff">◈</div>
       </div>
-      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
-        <div class="stat-card green"><div class="stat-label">Active</div><div class="stat-value" id="r-active">—</div></div>
-        <div class="stat-card yellow"><div class="stat-label">Expired</div><div class="stat-value" id="r-exp">—</div></div>
-        <div class="stat-card purple"><div class="stat-label">Total Added</div><div class="stat-value" id="r-total">—</div></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card c-green"><div class="stat-label">Active</div><div class="stat-val" id="r-active">—</div></div>
+        <div class="stat-card c-yellow"><div class="stat-label">Expired</div><div class="stat-val" id="r-exp">—</div></div>
+        <div class="stat-card c-purple"><div class="stat-label">Total</div><div class="stat-val" id="r-total">—</div></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">My Recent Users</div><button class="btn btn-ghost btn-sm" onclick="showPage('r-my-users')">View All</button></div>
-        <div class="panel-body" id="r-recent"><div class="empty">Loading...</div></div>
+        <div class="panel-head"><div class="panel-title">Recent Users</div><button class="btn btn-ghost btn-sm" onclick="nav('r-users')">View All</button></div>
+        <div class="panel-body" id="r-recent"><div class="empty">Loading…</div></div>
       </div>
     </div>
 
     <!-- RESELLER ADD USER -->
-    <div class="page" id="page-r-add-user">
-      <div class="panel" style="max-width:540px;">
+    <div class="page" id="page-r-add">
+      <div class="panel" style="max-width:520px">
         <div class="panel-head"><div class="panel-title">Add User</div></div>
         <div class="panel-body">
-          <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:12px;color:var(--text2);">Your Balance</span>
-            <span style="font-size:16px;font-weight:700;color:var(--green);font-family:var(--mono);" id="r-bal2">$0.00</span>
+          <div class="info-box" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+            <span>Your Balance</span>
+            <strong id="r-bal2" style="color:var(--green);font-family:var(--mono);font-size:16px">$0.00</strong>
           </div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">HWID (32 hex)</label><input class="form-input" id="rau-hwid" placeholder="32 hex HWID" maxlength="32"></div>
             <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="rau-user" placeholder="Player username"></div>
-            <div class="form-group"><label class="form-label">Validity</label>
-              <div class="validity-grid">
-                <div class="validity-card selected" onclick="selRVal(this,1,2)"><div class="validity-days">1</div><div class="validity-label">Day</div><div class="validity-price">$2</div></div>
-                <div class="validity-card" onclick="selRVal(this,3,4)"><div class="validity-days">3</div><div class="validity-label">Days</div><div class="validity-price">$4</div></div>
-                <div class="validity-card" onclick="selRVal(this,7,8)"><div class="validity-days">7</div><div class="validity-label">Days</div><div class="validity-price">$8</div></div>
-                <div class="validity-card" onclick="selRVal(this,15,10)"><div class="validity-days">15</div><div class="validity-label">Days</div><div class="validity-price">$10</div></div>
-                <div class="validity-card" onclick="selRVal(this,30,15)"><div class="validity-days">30</div><div class="validity-label">Days</div><div class="validity-price">$15</div></div>
+            <div class="form-group">
+              <label class="form-label">Validity</label>
+              <div class="val-grid" id="rau-vals">
+                <div class="val-card sel" onclick="selRVal(this,1,2)"><div class="val-days">1</div><div class="val-label">Day</div><div class="val-price">$2</div></div>
+                <div class="val-card" onclick="selRVal(this,3,4)"><div class="val-days">3</div><div class="val-label">Days</div><div class="val-price">$4</div></div>
+                <div class="val-card" onclick="selRVal(this,7,8)"><div class="val-days">7</div><div class="val-label">Days</div><div class="val-price">$8</div></div>
+                <div class="val-card" onclick="selRVal(this,15,10)"><div class="val-days">15</div><div class="val-label">Days</div><div class="val-price">$10</div></div>
+                <div class="val-card" onclick="selRVal(this,30,15)"><div class="val-days">30</div><div class="val-label">Days</div><div class="val-price">$15</div></div>
               </div>
             </div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;" onclick="rAddUser()">Add — <span id="r-cost">$2</span></button>
+            <button class="btn btn-primary full-btn" onclick="rAddUser()">Add — <span id="r-cost">$2</span></button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- RESELLER MY USERS -->
-    <div class="page" id="page-r-my-users">
+    <div class="page" id="page-r-users">
       <div class="search-bar">
-        <input class="search-input" id="ru-search" placeholder="Search..." oninput="renderMyUsers()">
+        <input class="search-input" id="ru-search" placeholder="Search…" oninput="renderMyUsers()">
       </div>
       <div class="panel">
         <div class="panel-head"><div class="panel-title" id="ru-cnt">My Users</div></div>
@@ -338,38 +464,42 @@
     </div>
 
     <!-- RESELLER EDIT USER -->
-    <div class="page" id="page-r-edit-user">
-      <div class="panel" style="max-width:500px;">
+    <div class="page" id="page-r-edit">
+      <div class="panel" style="max-width:480px">
         <div class="panel-head"><div class="panel-title">Edit User</div></div>
         <div class="panel-body">
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Search HWID or Username</label>
-              <div style="display:flex;gap:8px;"><input class="form-input" id="eu-q" placeholder="Search..."><button class="btn btn-ghost" onclick="euSearch()">Find</button></div>
+            <div class="form-group">
+              <label class="form-label">Search HWID or Username</label>
+              <div style="display:flex;gap:8px">
+                <input class="form-input" id="eu-q" placeholder="Search…" style="flex:1;min-width:0">
+                <button class="btn btn-ghost" onclick="euSearch()">Find</button>
+              </div>
             </div>
-            <div id="eu-result" style="display:none;">
-              <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px;" id="eu-info"></div>
+            <div id="eu-result" style="display:none">
+              <div class="info-box" id="eu-info" style="margin-bottom:12px"></div>
               <div class="form-row">
                 <div class="form-group"><label class="form-label">New Username</label><input class="form-input" id="eu-newu" placeholder="Leave blank to keep"></div>
                 <div class="form-group"><label class="form-label">New HWID</label><input class="form-input" id="eu-newh" placeholder="Leave blank to keep" maxlength="32"></div>
               </div>
-              <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px;margin-top:10px;" onclick="euSave()">Save</button>
+              <button class="btn btn-primary full-btn" style="margin-top:10px" onclick="euSave()">Save Changes</button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
-</div>
+  </div><!-- /content -->
+</div><!-- /main -->
 
 <!-- REMOVE USER MODAL -->
 <div class="modal-overlay" id="modal-rm">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Remove User</div><button class="modal-close" onclick="closeModal('modal-rm')">×</button></div>
-    <div id="rm-info" style="font-size:13px;color:var(--text2);margin-bottom:12px;"></div>
-    <div style="color:var(--red);font-size:12px;">This cannot be undone.</div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-rm')">Cancel</button>
+    <div class="modal-head"><div class="modal-title">Remove User</div><button class="modal-close" onclick="closeM('modal-rm')">×</button></div>
+    <div id="rm-info" class="info-box" style="margin-bottom:10px"></div>
+    <div style="color:var(--red);font-size:12px">This cannot be undone.</div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('modal-rm')">Cancel</button>
       <button class="btn btn-red" onclick="doRemove()">Remove</button>
     </div>
   </div>
@@ -378,11 +508,11 @@
 <!-- REMOVE RESELLER MODAL -->
 <div class="modal-overlay" id="modal-rr">
   <div class="modal">
-    <div class="modal-head"><div class="modal-title">Remove Reseller</div><button class="modal-close" onclick="closeModal('modal-rr')">×</button></div>
-    <div id="rr-info" style="font-size:13px;color:var(--text2);margin-bottom:12px;"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-rr')">Cancel</button>
-      <button class="btn btn-red" onclick="doRemoveReseller()">Remove</button>
+    <div class="modal-head"><div class="modal-title">Remove Reseller</div><button class="modal-close" onclick="closeM('modal-rr')">×</button></div>
+    <div id="rr-info" class="info-box" style="margin-bottom:10px"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeM('modal-rr')">Cancel</button>
+      <button class="btn btn-red" onclick="doRemoveRes()">Remove</button>
     </div>
   </div>
 </div>
@@ -391,67 +521,79 @@
 
 <script>
 // ══ CONFIG ══
-const OWNER_IDS = ["8179239922","5901457715"];
-const GITHUB_TOKEN = "REPLACE_TOKEN_HERE";
-const HWID_GIST   = "21688ac03cf928c865d103ee2d8c995b";
-const RES_GIST    = "230ba2cb1b7212bab459d20df7b67ac3";
-const PRICES = {1:2,3:4,7:8,15:10,30:15};
+const WORKER_URL  = "https://zolam-api.bsssiyam126.workers.dev";
+const SECRET_KEY  = "zolam2024secret";
+const OWNER_IDS   = ["8179239922","5901457715"];
+const PRICES      = {1:2,3:4,7:8,15:10,30:15};
 
 // ══ STATE ══
-let role=null,me=null,allUsers=[],allRes={};
-let selDays=1,rSelDays=1,rSelPrice=2;
-let rmHwid=null,rmResId=null,euEntry=null,loginType='admin';
+let role=null, me=null, allUsers=[], allRes={};
+let selDays=1, rSelDays=1, rSelPrice=2;
+let rmHwid=null, rmResId=null, euEntry=null, loginType='admin';
 
-// ══ GIST URLS ══
-const hUrl=()=>`https://gist.githubusercontent.com/toriqulrx-ux/${HWID_GIST}/raw/device.txt?t=${Date.now()}`;
-const rUrl=()=>`https://gist.githubusercontent.com/toriqulrx-ux/${RES_GIST}/raw/Reseller%20data.txt?t=${Date.now()}`;
+// ══ API ══
+async function api(method, path, body=null){
+  const opts = {
+    method,
+    headers: { 'Content-Type':'application/json', 'X-Secret': SECRET_KEY }
+  };
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(WORKER_URL + path, opts);
+  if(!r.ok) throw new Error(await r.text());
+  return r.json();
+}
 
-// ══ DATA ══
-async function loadAll(){ await Promise.all([loadUsers(),loadRes()]); }
-async function loadUsers(){
-  try{
-    const t=await(await fetch(hUrl())).text();
-    allUsers=t.trim().split('\n').filter(l=>l&&l.split('=').length>=3).map(l=>{const p=l.split('=');return{u:p[0],h:p[1],e:p[2]};});
-  }catch{allUsers=[];}
+async function loadAll(){
+  const [users, resellers] = await Promise.all([
+    api('GET','/users'),
+    api('GET','/resellers')
+  ]);
+  allUsers = users.map(u=>({u:u.username, h:u.hwid, e:u.expire}));
+  allRes = {};
+  resellers.forEach(r=>{ allRes[r.id]={name:r.name, bal:r.balance}; });
 }
-async function loadRes(){
-  try{
-    const t=await(await fetch(rUrl())).text();
-    allRes={};
-    t.trim().split('\n').forEach(l=>{if(!l)return;const p=l.split('=');if(p[0]==='RESELLER'&&p.length>=4)allRes[p[1]]={name:p[2],bal:parseFloat(p[3])||0};});
-  }catch{allRes={};}
+
+// ══ HELPERS ══
+function expired(d){
+  try{ const [dd,mm,yy]=d.split('/').map(Number); return new Date(yy,mm-1,dd)<new Date(); }
+  catch{ return false; }
 }
-async function gistPatch(gid,file,content){
-  const r=await fetch(`https://api.github.com/gists/${gid}`,{method:'PATCH',headers:{'Authorization':'token '+GITHUB_TOKEN,'Content-Type':'application/json'},body:JSON.stringify({files:{[file]:{content}}})});
-  if(!r.ok)throw new Error('Failed');
+function validHwid(h){ return h.length===32&&/^[0-9a-fA-F]{32}$/.test(h); }
+function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`; }
+function badge(e){
+  const exp=expired(e);
+  const d=daysLeft(e);
+  if(exp) return '<span class="badge badge-r">Expired</span>';
+  if(d<=1) return '<span class="badge badge-y">Today</span>';
+  return '<span class="badge badge-g">Active</span>';
 }
-const saveUsers=()=>gistPatch(HWID_GIST,'device.txt',allUsers.map(u=>`${u.u}=${u.h}=${u.e}`).join('\n'));
-const saveRes=()=>gistPatch(RES_GIST,'Reseller data.txt',Object.entries(allRes).map(([id,d])=>`RESELLER=${id}=${d.name}=${d.bal.toFixed(2)}`).join('\n'));
+function daysLeft(d){
+  try{ const [dd,mm,yy]=d.split('/').map(Number); return Math.ceil((new Date(yy,mm-1,dd)-new Date())/864e5); }
+  catch{ return 9999; }
+}
 
 // ══ LOGIN ══
 function setTab(t,el){
   loginType=t;
-  document.querySelectorAll('.login-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.ltab').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
 }
 
 async function doLogin(){
-  const id=document.getElementById('login-id').value.trim();
-  const err=document.getElementById('login-err');
-  if(!id){err.textContent='Telegram ID দাও';return;}
-  err.textContent='Checking...';
-  await loadAll();
-  if(loginType==='admin'){
-    if(OWNER_IDS.includes(id)){
-      role='admin'; me={id,name:'Admin'};
-      startAdmin();
-    } else { err.textContent='তুমি Admin না!'; }
-  } else {
-    if(allRes[id]){
-      role='reseller'; me={id,name:allRes[id].name,bal:allRes[id].bal};
-      startReseller();
-    } else { err.textContent='Reseller হিসেবে পাওয়া গেলো না!'; }
-  }
+  const id = document.getElementById('login-id').value.trim();
+  const err = document.getElementById('login-err');
+  if(!id){ err.textContent='Telegram ID দাও'; return; }
+  err.textContent='Checking…';
+  try{
+    await loadAll();
+    if(loginType==='admin'){
+      if(OWNER_IDS.includes(id)){ role='admin'; me={id,name:'Admin'}; startAdmin(); }
+      else { err.textContent='তুমি Admin না!'; }
+    } else {
+      if(allRes[id]){ role='reseller'; me={id,name:allRes[id].name,bal:allRes[id].bal}; startReseller(); }
+      else { err.textContent='Reseller হিসেবে পাওয়া গেলো না!'; }
+    }
+  } catch(e){ err.textContent='Connection error. Worker URL check করো.'; }
 }
 
 function startAdmin(){
@@ -460,18 +602,16 @@ function startAdmin(){
   document.getElementById('sb-name').textContent='Admin';
   document.getElementById('sb-badge').textContent='Admin';
   document.getElementById('sb-badge').className='role-badge';
-  renderAll(); showPage('dashboard');
+  renderAll(); nav('dashboard');
 }
-
 function startReseller(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('nav-reseller').style.display='';
   document.getElementById('sb-name').textContent=me.name;
   document.getElementById('sb-badge').textContent='Reseller';
-  document.getElementById('sb-badge').className='role-badge reseller';
-  renderAll(); showPage('r-dashboard');
+  document.getElementById('sb-badge').className='role-badge res';
+  renderAll(); nav('r-dash');
 }
-
 function logout(){
   role=null; me=null;
   document.getElementById('login-screen').style.display='flex';
@@ -481,95 +621,148 @@ function logout(){
   document.getElementById('login-err').textContent='';
 }
 
-// ══ HELPERS ══
-function expired(d){try{const[dd,mm,yy]=d.split('/').map(Number);return new Date(yy,mm-1,dd)<new Date();}catch{return false;}}
-function validHwid(h){return h.length===32&&/^[0-9a-fA-F]{32}$/.test(h);}
-function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
-function badge(e){return expired(e)?'<span class="badge badge-red">Expired</span>':'<span class="badge badge-green">Active</span>';}
-
 // ══ RENDER ══
 function renderAll(){
-  if(role==='admin'){renderDash();renderUsers();renderResellers();fillResSel();}
-  else if(role==='reseller'){renderRDash();renderMyUsers();updRBal();}
+  if(role==='admin'){ renderDash(); renderUsers(); renderResellers(); fillResSel(); }
+  else if(role==='reseller'){ renderRDash(); renderMyUsers(); updRBal(); }
 }
 
 function renderDash(){
-  document.getElementById('s-active').textContent=allUsers.filter(u=>!expired(u.e)).length;
+  const active=allUsers.filter(u=>!expired(u.e)).length;
+  document.getElementById('s-active').textContent=active;
   document.getElementById('s-total').textContent=allUsers.length;
-  document.getElementById('s-exp').textContent=allUsers.filter(u=>expired(u.e)).length;
+  document.getElementById('s-exp').textContent=allUsers.length-active;
   document.getElementById('s-res').textContent=Object.keys(allRes).length;
-  const rec=[...allUsers].slice(-5).reverse();
-  document.getElementById('dash-users').innerHTML=!rec.length?'<div class="empty">No users</div>':`<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${rec.map(u=>`<tr><td>${u.u}</td><td class="mono">${u.h.substring(0,8)}…</td><td>${u.e}</td><td>${badge(u.e)}</td></tr>`).join('')}</tbody></table></div>`;
+  const rec=[...allUsers].slice(-6).reverse();
+  document.getElementById('dash-users').innerHTML = !rec.length?'<div class="empty">No users</div>':
+    `<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${
+      rec.map(u=>`<tr><td>${u.u}</td><td class="mono">${u.h.substring(0,10)}…</td><td>${u.e}</td><td>${badge(u.e)}</td></tr>`).join('')
+    }</tbody></table></div>`;
   const rs=Object.entries(allRes);
-  document.getElementById('dash-resellers').innerHTML=!rs.length?'<div class="empty">No resellers</div>':`<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>ID</th><th>Balance</th></tr></thead><tbody>${rs.map(([id,d])=>`<tr><td>${d.name}</td><td class="mono">${id}</td><td style="color:var(--green);font-family:var(--mono);">$${d.bal.toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('dash-res').innerHTML = !rs.length?'<div class="empty">No resellers</div>':
+    `<div class="tbl-wrap"><table><thead><tr><th>Name</th><th>ID</th><th>Balance</th></tr></thead><tbody>${
+      rs.map(([id,d])=>`<tr><td>${d.name}</td><td class="mono">${id}</td><td style="color:var(--green);font-family:var(--mono)">$${d.bal.toFixed(2)}</td></tr>`).join('')
+    }</tbody></table></div>`;
 }
 
 function renderUsers(){
-  const q=(document.getElementById('user-search')||{value:''}).value.toLowerCase();
+  const q=(document.getElementById('u-search')||{value:''}).value.toLowerCase();
   const f=allUsers.filter(u=>u.u.toLowerCase().includes(q)||u.h.toLowerCase().includes(q));
-  document.getElementById('users-cnt').textContent=`Users (${f.length})`;
-  document.getElementById('users-tbody').innerHTML=!f.length?`<tr><td colspan="6"><div class="empty">No users</div></td></tr>`:f.map((u,i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${u.u}</b></td><td class="mono">${u.h.substring(0,12)}…</td><td>${u.e}</td><td>${badge(u.e)}</td><td><button class="btn btn-red btn-sm" onclick="openRm('${u.h}','${u.u}')">Remove</button></td></tr>`).join('');
+  document.getElementById('u-cnt').textContent=`Users (${f.length})`;
+  document.getElementById('u-tbody').innerHTML = !f.length?`<tr><td colspan="6"><div class="empty">No users</div></td></tr>`:
+    f.map((u,i)=>`<tr><td style="color:var(--text3)">${i+1}</td><td><strong>${u.u}</strong></td><td class="mono">${u.h.substring(0,14)}…</td><td>${u.e}</td><td>${badge(u.e)}</td><td><button class="btn btn-red btn-sm" onclick="openRm('${u.h}','${u.u.replace(/'/g,"\\'")}')">Remove</button></td></tr>`).join('');
 }
 
 function renderResellers(){
-  const q=(document.getElementById('res-search')||{value:''}).value.toLowerCase();
+  const q=(document.getElementById('r-search')||{value:''}).value.toLowerCase();
   const e=Object.entries(allRes).filter(([id,d])=>d.name.toLowerCase().includes(q)||id.includes(q));
-  document.getElementById('res-cnt').textContent=`Resellers (${e.length})`;
-  document.getElementById('res-tbody').innerHTML=!e.length?`<tr><td colspan="5"><div class="empty">No resellers</div></td></tr>`:e.map(([id,d],i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${d.name}</b></td><td class="mono">${id}</td><td style="color:var(--green);font-family:var(--mono);font-weight:600;">$${d.bal.toFixed(2)}</td><td style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="qAddBal('${id}')">+Bal</button><button class="btn btn-red btn-sm" onclick="openRr('${id}','${d.name}')">Remove</button></td></tr>`).join('');
+  document.getElementById('r-cnt').textContent=`Resellers (${e.length})`;
+  document.getElementById('r-tbody').innerHTML = !e.length?`<tr><td colspan="5"><div class="empty">No resellers</div></td></tr>`:
+    e.map(([id,d],i)=>`<tr>
+      <td style="color:var(--text3)">${i+1}</td>
+      <td><strong>${d.name}</strong></td>
+      <td class="mono">${id}</td>
+      <td style="color:var(--green);font-family:var(--mono);font-weight:600">$${d.bal.toFixed(2)}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="quickBal('${id}')">+Bal</button>
+        <button class="btn btn-red btn-sm" onclick="openRr('${id}','${d.name.replace(/'/g,"\\'")}')">Remove</button>
+      </td>
+    </tr>`).join('');
 }
 
 function fillResSel(){
   const s=document.getElementById('ab-sel');
   s.innerHTML='<option value="">— Select —</option>'+Object.entries(allRes).map(([id,d])=>`<option value="${id}">${d.name} (${id})</option>`).join('');
-  s.onchange=function(){const d=allRes[this.value];const i=document.getElementById('ab-info');if(d){i.style.display='block';document.getElementById('ab-cur').textContent='$'+d.bal.toFixed(2);}else{i.style.display='none';}};
 }
-
-function qAddBal(id){showPage('add-balance');setTimeout(()=>{const s=document.getElementById('ab-sel');s.value=id;s.dispatchEvent(new Event('change'));},100);}
+function abChange(){
+  const id=document.getElementById('ab-sel').value;
+  const d=allRes[id];
+  const i=document.getElementById('ab-info');
+  if(d){ i.style.display='block'; document.getElementById('ab-cur').textContent='$'+d.bal.toFixed(2); }
+  else { i.style.display='none'; }
+}
+function quickBal(id){ nav('add-balance'); setTimeout(()=>{ document.getElementById('ab-sel').value=id; abChange(); },80); }
 
 // ══ ADMIN ACTIONS ══
-function selVal(el,d){document.querySelectorAll('#page-add-user .validity-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');selDays=d;}
+function selVal(el,d){
+  document.querySelectorAll('#au-vals .val-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); selDays=d;
+}
 
 async function addUser(){
   const h=document.getElementById('au-hwid').value.trim();
   const u=document.getElementById('au-user').value.trim();
-  if(!validHwid(h)){toast('Invalid HWID — 32 hex chars','error');return;}
-  if(!u){toast('Username দাও','error');return;}
-  const e=addDays(selDays);
-  const i=allUsers.findIndex(x=>x.h===h);
-  if(i>=0)allUsers[i]={u,h,e};else allUsers.push({u,h,e});
-  try{await saveUsers();toast(`"${u}" added!`,'success');document.getElementById('au-hwid').value='';document.getElementById('au-user').value='';renderAll();}
-  catch{toast('Save failed','error');}
+  if(!validHwid(h)){toast('Invalid HWID — 32 hex chars','err');return;}
+  if(!u){toast('Username দাও','err');return;}
+  try{
+    await api('POST','/users',{username:u,hwid:h,expire:addDays(selDays)});
+    toast(`"${u}" added!`,'ok');
+    document.getElementById('au-hwid').value='';
+    document.getElementById('au-user').value='';
+    await loadAll(); renderAll();
+  }catch{ toast('Save failed','err'); }
 }
 
 async function addReseller(){
   const id=document.getElementById('ar-id').value.trim();
   const name=document.getElementById('ar-name').value.trim();
   const bal=parseFloat(document.getElementById('ar-bal').value)||0;
-  if(!id||!/^\d+$/.test(id)){toast('Valid Telegram ID দাও','error');return;}
-  if(!name){toast('Name দাও','error');return;}
-  if(allRes[id]){toast('Already reseller','error');return;}
-  allRes[id]={name,bal};
-  try{await saveRes();toast(`"${name}" added!`,'success');document.getElementById('ar-id').value='';document.getElementById('ar-name').value='';document.getElementById('ar-bal').value='';renderAll();fillResSel();}
-  catch{toast('Save failed','error');}
+  if(!id||!/^\d+$/.test(id)){toast('Valid Telegram ID দাও','err');return;}
+  if(!name){toast('Name দাও','err');return;}
+  try{
+    await api('POST','/resellers',{id,name,balance:bal});
+    toast(`"${name}" added!`,'ok');
+    document.getElementById('ar-id').value='';
+    document.getElementById('ar-name').value='';
+    document.getElementById('ar-bal').value='';
+    await loadAll(); renderAll(); fillResSel();
+  }catch{ toast('Save failed','err'); }
 }
 
 async function addBalance(){
   const id=document.getElementById('ab-sel').value;
   const amt=parseFloat(document.getElementById('ab-amt').value)||0;
-  if(!id){toast('Reseller select করো','error');return;}
-  if(amt<=0){toast('Amount দাও','error');return;}
-  const old=allRes[id].bal;
-  allRes[id].bal=Math.round((old+amt)*100)/100;
-  try{await saveRes();toast(`$${old.toFixed(2)} → $${allRes[id].bal.toFixed(2)}`,'success');document.getElementById('ab-amt').value='';document.getElementById('ab-sel').dispatchEvent(new Event('change'));renderAll();}
-  catch{toast('Failed','error');}
+  if(!id){toast('Reseller select করো','err');return;}
+  if(amt<=0){toast('Amount দাও','err');return;}
+  try{
+    await api('POST','/balance',{id,amount:amt});
+    toast(`$${amt.toFixed(2)} added!`,'ok');
+    document.getElementById('ab-amt').value='';
+    await loadAll(); renderAll(); fillResSel();
+    document.getElementById('ab-sel').value=id; abChange();
+  }catch{ toast('Failed','err'); }
 }
 
 // ══ REMOVE ══
-function openRm(h,u){rmHwid=h;document.getElementById('rm-info').innerHTML=`<b>${u}</b><br><span class="mono">${h}</span>`;document.getElementById('modal-rm').classList.add('open');}
-async function doRemove(){if(!rmHwid)return;allUsers=allUsers.filter(u=>u.h!==rmHwid);try{await saveUsers();toast('Removed','success');closeModal('modal-rm');renderAll();}catch{toast('Failed','error');}rmHwid=null;}
-function openRr(id,name){rmResId=id;document.getElementById('rr-info').innerHTML=`<b>${name}</b> (${id})`;document.getElementById('modal-rr').classList.add('open');}
-async function doRemoveReseller(){if(!rmResId)return;delete allRes[rmResId];try{await saveRes();toast('Removed','success');closeModal('modal-rr');renderAll();fillResSel();}catch{toast('Failed','error');}rmResId=null;}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openRm(h,u){
+  rmHwid=h;
+  document.getElementById('rm-info').innerHTML=`<strong>${u}</strong><br><span class="mono">${h}</span>`;
+  document.getElementById('modal-rm').classList.add('open');
+}
+async function doRemove(){
+  if(!rmHwid)return;
+  try{
+    await api('DELETE','/users',{hwid:rmHwid});
+    toast('Removed','ok'); closeM('modal-rm');
+    await loadAll(); renderAll();
+  }catch{ toast('Failed','err'); }
+  rmHwid=null;
+}
+function openRr(id,name){
+  rmResId=id;
+  document.getElementById('rr-info').innerHTML=`<strong>${name}</strong> <span class="mono">(${id})</span>`;
+  document.getElementById('modal-rr').classList.add('open');
+}
+async function doRemoveRes(){
+  if(!rmResId)return;
+  try{
+    await api('DELETE','/resellers',{id:rmResId});
+    toast('Removed','ok'); closeM('modal-rr');
+    await loadAll(); renderAll(); fillResSel();
+  }catch{ toast('Failed','err'); }
+  rmResId=null;
+}
+function closeM(id){ document.getElementById(id).classList.remove('open'); }
 
 // ══ RESELLER ══
 function updRBal(){
@@ -587,25 +780,34 @@ function renderRDash(){
   document.getElementById('r-exp').textContent=my.filter(u=>expired(u.e)).length;
   document.getElementById('r-total').textContent=my.length;
   const rec=[...my].slice(-5).reverse();
-  document.getElementById('r-recent').innerHTML=!rec.length?'<div class="empty">No users yet</div>':`<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${rec.map(u=>`<tr><td>${u.u}</td><td class="mono">${u.h.substring(0,8)}…</td><td>${u.e}</td><td>${badge(u.e)}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('r-recent').innerHTML=!rec.length?'<div class="empty">No users yet</div>':
+    `<div class="tbl-wrap"><table><thead><tr><th>Username</th><th>HWID</th><th>Expires</th><th>Status</th></tr></thead><tbody>${
+      rec.map(u=>`<tr><td>${u.u}</td><td class="mono">${u.h.substring(0,8)}…</td><td>${u.e}</td><td>${badge(u.e)}</td></tr>`).join('')
+    }</tbody></table></div>`;
 }
 
-function selRVal(el,d,p){document.querySelectorAll('#page-r-add-user .validity-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');rSelDays=d;rSelPrice=p;document.getElementById('r-cost').textContent='$'+p;}
+function selRVal(el,d,p){
+  document.querySelectorAll('#rau-vals .val-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); rSelDays=d; rSelPrice=p;
+  document.getElementById('r-cost').textContent='$'+p;
+}
 
 async function rAddUser(){
   const h=document.getElementById('rau-hwid').value.trim();
   const u=document.getElementById('rau-user').value.trim();
-  if(!validHwid(h)){toast('Invalid HWID','error');return;}
-  if(!u){toast('Username দাও','error');return;}
+  if(!validHwid(h)){toast('Invalid HWID','err');return;}
+  if(!u){toast('Username দাও','err');return;}
   const bal=allRes[me.id]?.bal??0;
-  if(bal<rSelPrice){toast(`Balance কম! Need $${rSelPrice}, have $${bal.toFixed(2)}`,'error');return;}
-  const e=addDays(rSelDays);
+  if(bal<rSelPrice){toast(`Balance কম! Need $${rSelPrice}, have $${bal.toFixed(2)}`,'err');return;}
   const fn=me.name+'_'+u;
-  allRes[me.id].bal=Math.round((bal-rSelPrice)*100)/100;
-  const i=allUsers.findIndex(x=>x.h===h);
-  if(i>=0)allUsers[i]={u:fn,h,e};else allUsers.push({u:fn,h,e});
-  try{await Promise.all([saveUsers(),saveRes()]);toast(`"${u}" added!`,'success');document.getElementById('rau-hwid').value='';document.getElementById('rau-user').value='';me.bal=allRes[me.id].bal;renderAll();}
-  catch{toast('Failed','error');}
+  try{
+    await api('POST','/users',{username:fn,hwid:h,expire:addDays(rSelDays)});
+    await api('POST','/balance',{id:me.id,amount:-rSelPrice});
+    toast(`"${u}" added!`,'ok');
+    document.getElementById('rau-hwid').value='';
+    document.getElementById('rau-user').value='';
+    await loadAll(); renderAll();
+  }catch{ toast('Failed','err'); }
 }
 
 function renderMyUsers(){
@@ -613,60 +815,64 @@ function renderMyUsers(){
   const my=allUsers.filter(u=>u.u.startsWith(me.name+'_'));
   const f=my.filter(u=>u.u.toLowerCase().includes(q)||u.h.toLowerCase().includes(q));
   document.getElementById('ru-cnt').textContent=`My Users (${f.length})`;
-  document.getElementById('ru-tbody').innerHTML=!f.length?`<tr><td colspan="6"><div class="empty">No users</div></td></tr>`:f.map((u,i)=>`<tr><td style="color:var(--text3);">${i+1}</td><td><b>${u.u}</b></td><td class="mono">${u.h.substring(0,12)}…</td><td>${u.e}</td><td>${badge(u.e)}</td><td><button class="btn btn-red btn-sm" onclick="openRm('${u.h}','${u.u}')">Remove</button></td></tr>`).join('');
+  document.getElementById('ru-tbody').innerHTML=!f.length?`<tr><td colspan="6"><div class="empty">No users</div></td></tr>`:
+    f.map((u,i)=>`<tr><td style="color:var(--text3)">${i+1}</td><td><strong>${u.u}</strong></td><td class="mono">${u.h.substring(0,12)}…</td><td>${u.e}</td><td>${badge(u.e)}</td><td><button class="btn btn-red btn-sm" onclick="openRm('${u.h}','${u.u.replace(/'/g,"\\'")}')">Remove</button></td></tr>`).join('');
 }
 
 function euSearch(){
   const q=document.getElementById('eu-q').value.trim().toLowerCase();
   euEntry=null;
   const found=allUsers.find(u=>u.h.toLowerCase()===q||u.u.toLowerCase()===q||u.u.split('_').pop().toLowerCase()===q);
-  if(!found){toast('পাওয়া গেলো না','error');document.getElementById('eu-result').style.display='none';return;}
+  if(!found){toast('পাওয়া গেলো না','err');document.getElementById('eu-result').style.display='none';return;}
   euEntry=found;
   document.getElementById('eu-result').style.display='block';
-  document.getElementById('eu-info').innerHTML=`<b>Username:</b> ${found.u}<br><b>HWID:</b> <span class="mono">${found.h}</span><br><b>Expires:</b> ${found.e}`;
+  document.getElementById('eu-info').innerHTML=`<strong>Username:</strong> ${found.u}<br><strong>HWID:</strong> <span class="mono">${found.h}</span><br><strong>Expires:</strong> ${found.e}`;
 }
 
 async function euSave(){
   if(!euEntry)return;
   const nu=document.getElementById('eu-newu').value.trim();
   const nh=document.getElementById('eu-newh').value.trim();
-  if(nh&&!validHwid(nh)){toast('Invalid HWID','error');return;}
-  const i=allUsers.findIndex(u=>u.h===euEntry.h);
-  if(i<0){toast('Not found','error');return;}
-  if(nu)allUsers[i].u=nu;
-  if(nh)allUsers[i].h=nh;
-  try{await saveUsers();toast('Updated!','success');document.getElementById('eu-result').style.display='none';document.getElementById('eu-q').value='';renderAll();}
-  catch{toast('Failed','error');}
+  if(nh&&!validHwid(nh)){toast('Invalid HWID','err');return;}
+  try{
+    await api('PUT','/users',{old_hwid:euEntry.h,new_username:nu||undefined,new_hwid:nh||undefined});
+    toast('Updated!','ok');
+    document.getElementById('eu-result').style.display='none';
+    document.getElementById('eu-q').value='';
+    await loadAll(); renderAll();
+  }catch{ toast('Failed','err'); }
 }
 
 // ══ SYNC ══
-async function syncData(){
-  const ic=document.getElementById('sync-icon');
+async function syncAll(){
+  const ic=document.getElementById('sync-ic');
   ic.style.animation='spin 1s linear infinite';
-  await loadAll();renderAll();
+  try{ await loadAll(); renderAll(); toast('Synced!','ok'); }
+  catch{ toast('Sync failed','err'); }
   ic.style.animation='';
-  toast('Synced!','success');
 }
 
 // ══ NAV ══
-const TITLES={'dashboard':'Dashboard','users':'Users','add-user':'Add User','resellers':'Resellers','add-reseller':'Add Reseller','add-balance':'Add Balance','r-dashboard':'Dashboard','r-add-user':'Add User','r-my-users':'My Users','r-edit-user':'Edit User'};
-function showPage(id){
+const TITLES={dashboard:'Dashboard',users:'Users','add-user':'Add User',resellers:'Resellers','add-reseller':'Add Reseller','add-balance':'Add Balance','r-dash':'Dashboard','r-add':'Add User','r-users':'My Users','r-edit':'Edit User'};
+function nav(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active');});
-  document.getElementById('topbar-title').textContent=TITLES[id]||id;
+  const pg=document.getElementById('page-'+id); if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active'); });
+  document.getElementById('tb-title').textContent=TITLES[id]||id;
   if(id==='add-balance')fillResSel();
-  if(id==='r-dashboard')renderRDash();
-  if(id==='r-my-users')renderMyUsers();
-  if(id==='r-add-user')updRBal();
+  if(id==='r-dash')renderRDash();
+  if(id==='r-users')renderMyUsers();
+  if(id==='r-add')updRBal();
 }
 
 // ══ TOAST ══
 let tt;
-function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='show '+(type||'');clearTimeout(tt);tt=setTimeout(()=>{el.className='';},3000);}
-
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show '+(type||'');
+  clearTimeout(tt); tt=setTimeout(()=>{ el.className=''; },3000);
+}
 </script>
-</body>
-</html>
+
+</body></html>
