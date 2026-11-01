@@ -1262,24 +1262,41 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 });
 
 // ── API ──
-async function _api(method, path, body=null){
-  const token=loadToken();
+// Server messages are shown as-is only when they are plain English.
+// Anything containing Bangla script (or empty) is replaced with a clear English message.
+const HAS_NON_LATIN = /[\u0980-\u09FF]/;
+function cleanErr(msg, status, isLogin){
+  const m = String(msg || '').trim();
+  if(m && !HAS_NON_LATIN.test(m)) return m;
+  if(status === 401) return isLogin ? 'Incorrect user ID or password.' : 'Session expired. Please sign in again.';
+  if(status === 403) return isLogin ? 'Access denied. Contact the admin.' : 'You don’t have permission to do that.';
+  if(status === 404) return isLogin ? 'Account not found.' : 'Not found.';
+  if(status === 409) return 'This entry already exists.';
+  if(status === 429) return 'Too many attempts. Please wait a moment and try again.';
+  if(status >= 500)  return 'Server error. Please try again later.';
+  if(status >= 400)  return isLogin ? 'Sign in failed. Check your details and try again.' : 'Invalid request. Check your details and try again.';
+  return 'Something went wrong. Please try again.';
+}
+async function request(method, path, body, withAuth){
   const headers={'Content-Type':'application/json'};
-  if(token) headers['Authorization']='Bearer '+token;
+  if(withAuth){ const t=loadToken(); if(t) headers['Authorization']='Bearer '+t; }
   const opts={method,headers};
   if(body) opts.body=JSON.stringify(body);
-  const r=await fetch(WORKER_URL+path,opts);
-  const data=await r.json();
+  let r, data={};
+  try{ r=await fetch(WORKER_URL+path,opts); }
+  catch{ throw new Error('Can’t reach the server. Check your internet connection.'); }
+  try{ data=await r.json(); }catch{ data={}; }
+  return {r,data};
+}
+async function _api(method, path, body=null){
+  const {r,data}=await request(method,path,body,true);
   if(r.status===401){ logout(); throw new Error('Session expired. Please sign in again.'); }
-  if(!r.ok) throw new Error(data.error||'Request failed');
+  if(!r.ok) throw new Error(cleanErr(data.error, r.status, false));
   return data;
 }
 async function _apiPublic(method, path, body=null){
-  const opts={method,headers:{'Content-Type':'application/json'}};
-  if(body) opts.body=JSON.stringify(body);
-  const r=await fetch(WORKER_URL+path,opts);
-  const data=await r.json();
-  if(!r.ok) throw new Error(data.error||'Request failed');
+  const {r,data}=await request(method,path,body,false);
+  if(!r.ok) throw new Error(cleanErr(data.error, r.status, path.startsWith('/auth/')));
   return data;
 }
 async function api(...a){ bar.start(); try{ return await _api(...a); } finally{ bar.done(); } }
