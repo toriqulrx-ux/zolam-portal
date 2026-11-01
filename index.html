@@ -825,8 +825,7 @@ async function rAddUser(){
   if(bal<rSelPrice){toast(`Balance কম! Need $${rSelPrice}, have $${bal.toFixed(2)}`,'err');return;}
   const fn=me.name+'_'+u;
   try{
-    await api('POST','/users',{username:fn,hwid:h,expire:addDays(rSelDays)});
-    await api('POST','/balance',{id:me.id,amount:-rSelPrice});
+    await api('POST','/users',{username:fn,hwid:h,expire:addDays(rSelDays),days:rSelDays});
     toast(`"${u}" added!`,'ok');
     document.getElementById('rau-hwid').value='';
     document.getElementById('rau-user').value='';
